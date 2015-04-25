@@ -1,0 +1,7 @@
+*
+!.gitignore
+!Makefile.am
+!/*.cpp
+!/cases/
+!/cases/**/
+!/cases/**/*.hpp
