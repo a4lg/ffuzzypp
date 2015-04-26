@@ -76,7 +76,7 @@ Configuration Options
 Building Examples
 ------------------
 
-We have two examples:
+There are two examples:
 
 *	examples/compare-hash  
 	You can use this program to compare two fuzzy digests.
