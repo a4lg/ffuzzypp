@@ -377,7 +377,7 @@ template <typename T> using digest_to_long  = typename internal::digest_alt_type
 #error do not define FFUZZYPP_LOCAL_CHK1
 #endif
 #define FFUZZYPP_LOCAL_CHK1(s, t) \
-	static_assert(std::has_trivial_default_constructor<digest<s, t>>::value, \
+	static_assert(std::is_trivially_default_constructible<digest<s, t>>::value, \
 		"digest<" #s ", " #t "> must be a trivially default constructible type."); \
 	static_assert(std::is_standard_layout<digest<s, t>>::value, \
 		"digest<" #s ", " #t "> must be a standard-layout type."); \
@@ -386,7 +386,7 @@ template <typename T> using digest_to_long  = typename internal::digest_alt_type
 	static_assert(sizeof(digest_data<s>) == sizeof(digest<s, t>), \
 		"digest_data<" #s ">, digest<" #s ", true> and digest<" #s ", false> must be nearly equivalent.")
 #define FFUZZYPP_LOCAL_CHK(s) \
-	static_assert(std::has_trivial_default_constructor<digest_data<s>>::value, \
+	static_assert(std::is_trivially_default_constructible<digest_data<s>>::value, \
 		"digest_data<" #s "> must be a trivially default constructible type."); \
 	static_assert(std::is_standard_layout<digest_data<s>>::value, \
 		"digest_data<" #s "> must be a standard-layout type."); \
