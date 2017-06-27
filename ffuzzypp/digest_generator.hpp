@@ -508,18 +508,19 @@ public:
 		return digest().pretty();
 	}
 public:
-	template <bool Shortened = true>
+	template <bool Shortened = false>
 	digest_long_unorm_t digest_long(void)
 	{
-		return digest_in_type<digest_long_unorm_t, false, false, false>();
+		return digest_in_type<digest_long_unorm_t, false, false, Shortened>();
 	}
 	digest_t digest_normalized(void)
 	{
 		return digest_in_type<digest_t, true, true>();
 	}
+	template <bool Shortened = false>
 	digest_long_t digest_long_normalized(void)
 	{
-		return digest_in_type<digest_long_t, false, true, false>();
+		return digest_in_type<digest_long_t, false, true, Shortened>();
 	}
 
 	// Constructors
