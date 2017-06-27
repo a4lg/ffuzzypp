@@ -27,7 +27,7 @@
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-	CREDIT OF MODIFIED PORTIONS
+	CREDIT OF MODIFIED PORTIONS (HASHARRAY ALGORITHM)
 
 	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
@@ -41,6 +41,7 @@
 #include <cstring>
 
 #include "../rolling_hash.hpp"
+#include "position_array.hpp"
 
 namespace ffuzzy {
 namespace strings {
@@ -48,11 +49,11 @@ namespace strings {
 namespace internal
 {
 	template <size_t SubstrSize>
-	class common_substr_common
+	class common_substr_hasharray_impl
 	{
 	private:
-		common_substr_common(void) = delete;
-		common_substr_common(const common_substr_common&) = delete;
+		common_substr_hasharray_impl(void) = delete;
+		common_substr_hasharray_impl(const common_substr_hasharray_impl&) = delete;
 	public:
 		static constexpr const size_t substr_size = SubstrSize;
 		static_assert(0 < substr_size, "substr_size must be nonzero.");
@@ -102,11 +103,11 @@ namespace internal
 }
 
 template <size_t MaxSize, size_t SubstrSize>
-class common_substr_fast
+class common_substr_hasharray
 {
 private:
-	common_substr_fast(void) = delete;
-	common_substr_fast(const common_substr_fast&) = delete;
+	common_substr_hasharray(void) = delete;
+	common_substr_hasharray(const common_substr_hasharray&) = delete;
 public:
 	static constexpr const size_t max_size = MaxSize;
 	static constexpr const size_t substr_size = SubstrSize;
@@ -123,19 +124,34 @@ public:
 		assert(s2);
 		assert(s1len <= max_size);
 		#endif
-		if (max_size >= substr_size)
-		{
-			uint_least32_t hashes[max_size - (substr_size - 1)];
-			if (s1len < substr_size)
-				return false;
-			if (s2len < substr_size)
-				return false;
-			return internal
-				::common_substr_common<substr_size>
-				::match_long_buf(s1, s1len, s2, s2len, hashes);
-		}
-		else
+		uint_least32_t hashes[max_size - (substr_size - 1)];
+		if (s1len < substr_size)
 			return false;
+		if (s2len < substr_size)
+			return false;
+		return internal
+			::common_substr_hasharray_impl<substr_size>
+			::match_long_buf(s1, s1len, s2, s2len, hashes);
+	}
+};
+
+
+template <size_t MaxSize, size_t SubstrSize>
+class common_substr_fast
+{
+private:
+	common_substr_fast(void) = delete;
+	common_substr_fast(const common_substr_fast&) = delete;
+public:
+	static constexpr const size_t max_size = MaxSize;
+	static constexpr const size_t substr_size = SubstrSize;
+public:
+	static bool match(
+		const char* s1, size_t s1len,
+		const char* s2, size_t s2len
+	) noexcept
+	{
+		return common_substr_hasharray<max_size, substr_size>::match(s1, s1len, s2, s2len);
 	}
 };
 
