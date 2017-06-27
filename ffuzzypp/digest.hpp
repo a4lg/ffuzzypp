@@ -286,6 +286,10 @@ public:
 	{
 		internal::digest_copy::copy(*this, other);
 	}
+	digest(const digest<true, true>& other) noexcept
+	{
+		internal::digest_copy::copy(*this, other);
+	}
 	explicit digest(const char* str) noexcept(false) : digest_base<false, false>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
@@ -299,6 +303,11 @@ public:
 		return *this;
 	}
 	const digest& operator=(const digest<true, false>& other) noexcept
+	{
+		internal::digest_copy::copy(*static_cast<digest_data<false>*>(this), other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true>& other) noexcept
 	{
 		internal::digest_copy::copy(*static_cast<digest_data<false>*>(this), other);
 		return *this;
