@@ -44,6 +44,7 @@ nobase_include_HEADERS = \
 	ffuzzypp/strings/sequences.hpp \
 	ffuzzypp/strings/terminators.hpp \
 	ffuzzypp/strings/transform.hpp \
+	ffuzzypp/utils/likely.hpp \
 	ffuzzypp/utils/minmax.hpp \
 	ffuzzypp/utils/numeric_digits.hpp \
 	ffuzzypp/utils/ranges.hpp \

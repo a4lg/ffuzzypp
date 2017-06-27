@@ -30,6 +30,7 @@
 #endif
 #endif
 
+#include "ffuzzypp/utils/likely.hpp"
 #include "ffuzzypp/utils/minmax.hpp"
 #include "ffuzzypp/utils/safe_int.hpp"
 #include "ffuzzypp/utils/static_assert_query.hpp"
