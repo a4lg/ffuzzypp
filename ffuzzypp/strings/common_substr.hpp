@@ -55,6 +55,7 @@ namespace internal
 		common_substr_common(const common_substr_common&) = delete;
 	public:
 		static constexpr const size_t substr_size = SubstrSize;
+		static_assert(0 < substr_size, "substr_size must be nonzero.");
 		static_assert(substr_size >= rolling_hash::window_size,
 			"substr_size must be equal or greater than window_size.");
 	public:
@@ -109,6 +110,8 @@ private:
 public:
 	static constexpr const size_t max_size = MaxSize;
 	static constexpr const size_t substr_size = SubstrSize;
+	static_assert(0 < substr_size, "substr_size must be nonzero.");
+	static_assert(substr_size <= max_size, "substring size must not be greater than the maximum size.");
 public:
 	static bool match(
 		const char* s1, size_t s1len,
