@@ -73,7 +73,7 @@ private:
 public:
 	static constexpr const blockhash_len_t max_blockhash_len = 64;
 	static constexpr const blockhash_len_t max_blockhash_sequence = 3;
-	static_assert(max_blockhash_len != 0, "max_blockhash_len must not be zero.");
+	static_assert(max_blockhash_len >= 2, "max_blockhash_len must be 2 or greater.");
 	static_assert(max_blockhash_sequence != 0, "max_blockhash_sequence must not be zero.");
 	static_assert(safe_int::uvalue<size_t, max_blockhash_len>::is_valid,
 		"max_blockhash_len must be in range of size_t.");
@@ -145,7 +145,7 @@ public:
 
 	// "Initialization" and assignment
 public:
-	digest_data(void) noexcept = default; // initialize in undefined state
+	digest_data(void) noexcept = default; // initialize to undefined state
 	digest_data(const digest_data& other) noexcept
 		: blkhash1_len(other.blkhash1_len)
 		, blkhash2_len(other.blkhash2_len)
@@ -510,20 +510,6 @@ namespace internal
 	};
 }
 
-}
-
-
-// Specialization for standard `swap'
-namespace std
-{
-	template <bool IsShort>
-	inline void swap(
-		ffuzzy::digest_data<IsShort>& a,
-		ffuzzy::digest_data<IsShort>& b
-	) noexcept
-	{
-		ffuzzy::digest_data<IsShort>::swap(a, b);
-	}
 }
 
 #endif
