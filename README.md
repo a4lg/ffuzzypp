@@ -107,6 +107,17 @@ parameters) are enabled and you can disable these tests by adding
 
 
 
+Configuration
+--------------
+
+Defining certain macros before including `ffuzzy.hpp` can change some
+behavior of this library.
+
+*	`FFUZZYPP_DEBUG`  
+	This macro enables assertions for debugging.
+
+
+
 Caution
 --------
 
