@@ -43,8 +43,10 @@
 
 #include "digest_blocksize.hpp"
 #include "digest_data.hpp"
+#include "digest_position_array_base.hpp"
 #include "strings/common_substr.hpp"
 #include "strings/edit_dist.hpp"
+#include "strings/position_array.hpp"
 #include "utils/minmax.hpp"
 #include "utils/safe_int.hpp"
 
@@ -235,6 +237,23 @@ namespace internal
 				s1len, s2len
 			);
 		}
+		template <typename TBitmap, char CMin, char CMax>
+		static digest_comparison_score_t uncapped_score(
+			const strings::position_array<TBitmap, char, CMin, CMax>& s1, blockhash_len_t s1len,
+			const char* s2, blockhash_len_t s2len
+		) noexcept
+		{
+			if (!strings::common_substr_bitparallel<TBitmap, CMin, CMax,
+				digest_params::max_blockhash_len, blockhash_comparison_params::min_match_len>::match(s1, s2, size_t(s2len)))
+			{
+				return 0;
+			}
+			return uncapped_score(
+				strings::edit_dist_bitparallel<digest_comparison_score_t, TBitmap,
+					CMin, CMax, digest_params::max_blockhash_len>::cost(s1, size_t(s1len), s2, size_t(s2len)),
+				s1len, s2len
+			);
+		}
 	private:
 		static constexpr digest_comparison_score_t CONST_capped_score(
 			digest_comparison_score_t uncapped_score,
@@ -293,6 +312,24 @@ namespace internal
 			}
 			return score(
 				edit_dist_t::cost(s1, size_t(s1len), s2, size_t(s2len)),
+				blocksize, s1len, s2len
+			);
+		}
+		template <typename TBitmap, char CMin, char CMax>
+		static digest_comparison_score_t score(
+			const strings::position_array<TBitmap, char, CMin, CMax>& s1, blockhash_len_t s1len,
+			const char* s2, blockhash_len_t s2len,
+			digest_blocksize_t blocksize
+		) noexcept
+		{
+			if (!strings::common_substr_bitparallel<TBitmap, CMin, CMax,
+				digest_params::max_blockhash_len, blockhash_comparison_params::min_match_len>::match(s1, s2, size_t(s2len)))
+			{
+				return 0;
+			}
+			return score(
+				strings::edit_dist_bitparallel<digest_comparison_score_t, TBitmap,
+					CMin, CMax, digest_params::max_blockhash_len>::cost(s1, size_t(s1len), s2, size_t(s2len)),
 				blocksize, s1len, s2len
 			);
 		}
@@ -739,8 +776,84 @@ namespace internal
 			}
 		}
 		template <bool IsAlphabetRestricted, bool IsShort>
+		static digest_comparison_score_t compare_near_diff(
+			const digest_position_array_base<IsAlphabetRestricted>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(a.is_valid());
+			assert(b.is_valid() && b.is_normalized());
+			assert(digest_blocksize::is_near(a.blksize, b.blksize));
+			assert(a != b);
+			#endif
+			if (digest_blocksize::is_safe_to_double(a.blksize))
+			{
+				if (digest_blocksize::is_near_eq(a.blksize, b.blksize))
+					return std::max(
+						blockhash_comparison<Version>::score(
+							a.blkhash1, a.blkhash1_len,
+							b.digest, b.blkhash1_len,
+							a.blksize),
+						blockhash_comparison<Version>::score(
+							a.blkhash2, a.blkhash2_len,
+							b.digest+b.blkhash1_len, b.blkhash2_len,
+							a.blksize * 2));
+				else if (digest_blocksize::is_near_lt(a.blksize, b.blksize))
+					return blockhash_comparison<Version>::score(
+						a.blkhash2, a.blkhash2_len,
+						b.digest, b.blkhash1_len,
+						b.blksize);
+				else // digest_blocksize::is_near_gt
+					return blockhash_comparison<Version>::score(
+						a.blkhash1, a.blkhash1_len,
+						b.digest+b.blkhash1_len, b.blkhash2_len,
+						a.blksize);
+			}
+			else
+			{
+				if (digest_blocksize::is_near_eq(a.blksize, b.blksize))
+				{
+					/*
+						Assumption:
+						If the block size is large enough, the second
+						block hash is empty or 1-character.
+						This makes second block hash comparison score zero.
+					*/
+					static_assert(blockhash_comparison_params::min_match_len > 1,
+						"if the block size is not safe to double, the second block hash should not match "
+						"(due to implementation restrictions).");
+					#if defined(FFUZZYPP_DEBUG) && 0
+					assert(a.blkhash2_len <= 1);
+					assert(b.blkhash2_len <= 1);
+					#endif
+					return blockhash_comparison<Version>::score(
+						a.blkhash1, a.blkhash1_len,
+						b.digest, b.blkhash1_len,
+						a.blksize);
+				}
+				else if (digest_blocksize::is_near_gt(a.blksize, b.blksize))
+					return blockhash_comparison<Version>::score(
+						a.blkhash1, a.blkhash1_len,
+						b.digest+b.blkhash1_len, b.blkhash2_len,
+						a.blksize);
+				else // overflow (no common substring)
+					return 0;
+			}
+		}
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_diff(
 			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
+		) noexcept
+		{
+			if (!digest_blocksize::is_near(a.blksize, b.blksize))
+				return 0;
+			return compare_near_diff(a, b);
+		}
+		template <bool IsAlphabetRestricted, bool IsShort>
+		static digest_comparison_score_t compare_diff(
+			const digest_position_array_base<IsAlphabetRestricted>& a,
 			const digest_data<IsAlphabetRestricted, IsShort>& b
 		) noexcept
 		{
@@ -795,6 +908,49 @@ namespace internal
 			}
 		}
 		template <bool IsAlphabetRestricted, bool IsShort>
+		static digest_comparison_score_t compare_near_eq_diff(
+			const digest_position_array_base<IsAlphabetRestricted>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(a.is_valid());
+			assert(b.is_valid() && b.is_normalized());
+			assert(digest_blocksize::is_near_eq(a.blksize, b.blksize));
+			assert(a != b);
+			#endif
+			if (digest_blocksize::is_safe_to_double(a.blksize))
+				return std::max(
+					blockhash_comparison<Version>::score(
+						a.blkhash1, a.blkhash1_len,
+						b.digest, b.blkhash1_len,
+						a.blksize),
+					blockhash_comparison<Version>::score(
+						a.blkhash2, a.blkhash2_len,
+						b.digest+b.blkhash1_len, b.blkhash2_len,
+						a.blksize * 2));
+			else
+			{
+				/*
+					Assumption:
+					If the block size is large enough, the second
+					block hash is empty or 1-character.
+					This makes second block hash comparison score zero.
+				*/
+				static_assert(blockhash_comparison_params::min_match_len > 1,
+					"if the block size is not safe to double, the second block hash should not match "
+					"(due to implementation restrictions).");
+				#if defined(FFUZZYPP_DEBUG) && 0
+				assert(a.blkhash2_len <= 1);
+				assert(b.blkhash2_len <= 1);
+				#endif
+				return blockhash_comparison<Version>::score(
+					a.blkhash1, a.blkhash1_len,
+					b.digest, b.blkhash1_len,
+					a.blksize);
+			}
+		}
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_near_lt(
 			const digest_data<IsAlphabetRestricted, IsShort>& a,
 			const digest_data<IsAlphabetRestricted, IsShort>& b
@@ -810,6 +966,42 @@ namespace internal
 			return blockhash_comparison<Version>::score(
 				a.digest+a.blkhash1_len, a.blkhash2_len,
 				b.digest, b.blkhash1_len,
+				b.blksize);
+		}
+		template <bool IsAlphabetRestricted, bool IsShort>
+		static digest_comparison_score_t compare_near_lt(
+			const digest_position_array_base<IsAlphabetRestricted>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(a.is_valid());
+			assert(b.is_valid() && b.is_normalized());
+			assert(digest_blocksize::is_near_lt(a.blksize, b.blksize));
+			assert(a != b);
+			#endif
+			// implies digest_blocksize::is_safe_to_double(a.blksize)
+			return blockhash_comparison<Version>::score(
+				a.blkhash2, a.blkhash2_len,
+				b.digest, b.blkhash1_len,
+				b.blksize);
+		}
+		template <bool IsAlphabetRestricted, bool IsShort>
+		static digest_comparison_score_t compare_near_lt(
+			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_position_array_base<IsAlphabetRestricted>& b
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(a.is_valid() && a.is_normalized());
+			assert(b.is_valid());
+			assert(digest_blocksize::is_near_lt(a.blksize, b.blksize));
+			assert(a != b);
+			#endif
+			// implies digest_blocksize::is_safe_to_double(a.blksize)
+			return blockhash_comparison<Version>::score(
+				b.blkhash1, b.blkhash1_len,
+				a.digest+a.blkhash1_len, a.blkhash2_len,
 				b.blksize);
 		}
 	};
@@ -874,6 +1066,16 @@ public:
 			return base_type::compare_identical(b);
 		return base_type::compare_near_diff(a, b);
 	}
+	template <bool IsAlphabetRestricted, bool IsShort>
+	static digest_comparison_score_t compare_near(
+		const digest_position_array_base<IsAlphabetRestricted>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
+	) noexcept
+	{
+		if (a == b)
+			return base_type::compare_identical(b);
+		return base_type::compare_near_diff(a, b);
+	}
 
 	// Specialized comparison (possibly equivalent)
 public:
@@ -887,12 +1089,32 @@ public:
 			return base_type::compare_identical(b);
 		return base_type::compare_near_eq_diff(a, b);
 	}
+	template <bool IsAlphabetRestricted, bool IsShort>
+	static digest_comparison_score_t compare_near_eq(
+		const digest_position_array_base<IsAlphabetRestricted>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
+	) noexcept
+	{
+		if (digest_position_array_base<IsAlphabetRestricted>::is_eq_except_blocksize(a, b))
+			return base_type::compare_identical(b);
+		return base_type::compare_near_eq_diff(a, b);
+	}
 
 	// Comparison (for normalized digests)
 public:
 	template <bool IsAlphabetRestricted, bool IsShort>
 	static digest_comparison_score_t compare(
 		const digest_data<IsAlphabetRestricted, IsShort>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
+	) noexcept
+	{
+		if (!digest_blocksize::is_near(a.blksize, b.blksize))
+			return 0;
+		return compare_near(a, b);
+	}
+	template <bool IsAlphabetRestricted, bool IsShort>
+	static digest_comparison_score_t compare(
+		const digest_position_array_base<IsAlphabetRestricted>& a,
 		const digest_data<IsAlphabetRestricted, IsShort>& b
 	) noexcept
 	{

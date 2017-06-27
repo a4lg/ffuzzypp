@@ -37,6 +37,8 @@ nobase_include_HEADERS = \
 	ffuzzypp/digest_data.hpp \
 	ffuzzypp/digest_filesize.hpp \
 	ffuzzypp/digest_generator.hpp \
+	ffuzzypp/digest_position_array.hpp \
+	ffuzzypp/digest_position_array_base.hpp \
 	ffuzzypp/rolling_hash.hpp \
 	ffuzzypp/rolling_hash_ssdeep.hpp \
 	ffuzzypp/strings/common_substr.hpp \

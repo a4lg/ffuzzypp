@@ -2,10 +2,10 @@
 
 	ffuzzy++ : C++ implementation of fast fuzzy hasing
 
-	test_precond.cpp
-	Precondition tests
+	tests/cases/precond/digest_position_array_base.hpp
+	Digest type (position array) base class precondition tests
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 
 	Permission to use, copy, modify, and/or distribute this software for
@@ -21,26 +21,12 @@
 	OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+#ifndef FFUZZYPP_TESTCASES_PRECOND_DIGEST_POSITION_ARRAY_BASE_HPP
+#define FFUZZYPP_TESTCASES_PRECOND_DIGEST_POSITION_ARRAY_BASE_HPP
 
-#include "gtest/gtest.h"
-
-#ifndef FFUZZYPP_STATIC_SANITY_CHECKS
-#define FFUZZYPP_STATIC_SANITY_CHECKS
+#ifndef FFUZZYPP_DISABLE_POSITION_ARRAY
+static_assert(digest_params::max_blockhash_len > 64 || digest_position_array_params<true>::is_available,
+	"if max_blockhash_len is no greater than 64, position array version of the digest must be available.");
 #endif
-#include "ffuzzy.hpp"
-using namespace ffuzzy;
-using namespace std;
 
-#include "cases/precond/digest.hpp"
-#include "cases/precond/digest_filesize.hpp"
-#include "cases/precond/digest_position_array_base.hpp"
-#include "cases/precond/position_array.hpp"
-#include "cases/precond/utils/minmax.hpp"
-#include "cases/precond/utils/static_assert_query.hpp"
-#include "cases/precond/utils/type_modifier.hpp"
-
-TEST(PreconditionTests, AlreadyDone)
-{
-	// it always succeeds
-	// (the "test" is already done by compile time)
-}
+#endif

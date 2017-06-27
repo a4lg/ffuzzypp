@@ -39,6 +39,7 @@ EXTRA_DIST = \
 	.gitignore \
 	cases/precond/digest.hpp \
 	cases/precond/digest_filesize.hpp \
+	cases/precond/digest_position_array_base.hpp \
 	cases/precond/position_array.hpp \
 	cases/precond/utils/minmax.hpp \
 	cases/precond/utils/static_assert_query.hpp \
@@ -56,6 +57,7 @@ EXTRA_DIST = \
 	cases/compatibility/small/digest_generator_nil.hpp \
 	cases/compatibility/small/digest_generator_rolling_hash_overflow.hpp \
 	cases/compatibility/small/digest_normalization.hpp \
+	cases/compatibility/small/digest_position_array_usage.hpp \
 	cases/compatibility/small/digest_usage.hpp \
 	cases/small/base64.hpp \
 	cases/small/common_substr.hpp \

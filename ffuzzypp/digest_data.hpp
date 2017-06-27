@@ -117,6 +117,8 @@ namespace internal
 	class digest_copy;
 }
 template <comparison_version> class digest_comparison;
+template <bool> class digest_position_array_base;
+
 
 // Data structure for fuzzy digest (as base class)
 template <bool IsAlphabetRestricted, bool IsShort>
@@ -581,6 +583,7 @@ public:
 	// Friend classes
 	template <comparison_version> friend class internal::digest_comparison_base;
 	template <comparison_version> friend class digest_comparison;
+	template <bool> friend class digest_position_array_base;
 	friend class digest_generator;
 	friend class internal::digest_copy;
 };
