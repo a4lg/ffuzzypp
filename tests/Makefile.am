@@ -56,6 +56,7 @@ EXTRA_DIST = \
 	cases/compatibility/small/digest_generator_nil.hpp \
 	cases/compatibility/small/digest_generator_rolling_hash_overflow.hpp \
 	cases/compatibility/small/digest_normalization.hpp \
+	cases/compatibility/small/digest_usage.hpp \
 	cases/small/base64.hpp \
 	cases/small/common_substr.hpp \
 	cases/small/context_hash.hpp \

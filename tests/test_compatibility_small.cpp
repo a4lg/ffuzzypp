@@ -48,3 +48,4 @@ using namespace std;
 #include "cases/compatibility/small/digest_generator_rolling_hash_overflow.hpp"
 #include "cases/compatibility/small/digest_generator_forms.hpp"
 #include "cases/compatibility/small/digest_normalization.hpp"
+#include "cases/compatibility/small/digest_usage.hpp"
