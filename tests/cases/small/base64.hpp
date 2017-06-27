@@ -5,7 +5,7 @@
 	tests/cases/small/base64.hpp
 	Base64 tests
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 
 	Permission to use, copy, modify, and/or distribute this software for
@@ -27,6 +27,7 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <algorithm>
 #include <errno.h>
 
@@ -151,6 +152,43 @@ TEST(Base64Tests, Base64ValueTypes)
 			<< "Base64 character at " << i << " should be upper "
 			<< "(changing locale to C may make the test pass).";
 	}
+}
+
+TEST(Base64Tests, Base64Indices)
+{
+	// base64::toindex should return index of corresponding character
+	for (int i = 0; i < 64; i++)
+	{
+		EXPECT_EQ(i, base64::toindex(base64::values[i]))
+			<< "Base 64 character at " << i << " did not converted back to its index.";
+	}
+}
+
+TEST(Base64Tests, Base64Transformations)
+{
+	static const char base64_chars[12] =
+	{
+		'a', 'c', 'b',
+		'C', 'A', 'B',
+		'0', '1', '2',
+		'+', '/', ':',
+	};
+	static const char base64_indices[12] =
+	{
+		26, 28, 27,
+		2,  0,  1,
+		52, 53, 54,
+		62, 63, base64::invalid_index,
+	};
+	char buf1[12], buf2[12];
+	// indices to chars
+	memcpy(buf1, base64_indices, 12);
+	strings::nosequences<base64::transform_to_b64>::copy_raw(buf2, buf1, 11);
+	buf2[11] = base64_chars[11];
+	EXPECT_EQ(0, memcmp(buf2, base64_chars, 12));
+	// chars to indices
+	strings::nosequences<base64::transform_from_b64>::copy_raw(buf1, buf2, 12);
+	EXPECT_EQ(0, memcmp(buf1, base64_indices, 12));
 }
 
 #endif
