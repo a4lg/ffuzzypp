@@ -3,7 +3,7 @@
 	ffuzzy++ : C++ implementation of fast fuzzy hashing
 
 	digest.hpp
-	Fuzzy digest (wrapper with comparison methods)
+	Fuzzy digest (wrapper with converters)
 
 
 	CREDITS OF ORIGINAL VERSION OF SSDEEP
@@ -40,9 +40,8 @@
 #include <string>
 #include <type_traits>
 
-#include "digest_blocksize.hpp"
 #include "digest_data.hpp"
-#include "digest_comparison.hpp"
+#include "digest_base.hpp"
 #include "utils/type_modifier.hpp"
 
 namespace ffuzzy {
@@ -60,193 +59,6 @@ namespace ffuzzy {
 		Final class you want to use.
 		This type is specialized by both parameters.
 */
-
-template <bool IsShort, bool IsNormalized> class digest_base;
-
-// Normalized form of digest (with specialized/fast comparison)
-template <bool IsShort>
-class digest_base<IsShort, true>
-	: public digest_data<IsShort>
-{
-public:
-	digest_base(void) noexcept = default;
-	digest_base(const digest_base& other) noexcept : digest_data<IsShort>(other) {}
-	const digest_base& operator=(const digest_base& other) noexcept
-	{
-		digest_data<IsShort>::operator=(other);
-		return *this;
-	}
-public:
-	explicit digest_base(const char* str) noexcept(false)
-	{
-		if (!digest_data<IsShort>::parse_normalized(*this, str))
-			throw digest_parse_error();
-	}
-	explicit digest_base(const std::string& str)
-		: digest_base(str.c_str()) {}
-	static bool parse_normalized(digest_base& digest, const char* str) noexcept
-	{
-		return digest_data<IsShort>::parse_normalized(digest, str);
-	}
-	static bool parse(digest_base& digest, const char* str) noexcept
-	{
-		return digest_data<IsShort>::parse_normalized(digest, str);
-	}
-public:
-	bool is_valid(void) const noexcept
-	{
-		return digest_data<IsShort>::is_valid() && this->template is_normalized();
-	}
-
-	// Comparison
-public:
-	static digest_comparison_score_t compare(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare(a, b);
-	}
-	static digest_comparison_score_t compare_identical(
-		const digest_base& value
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_identical(value);
-	}
-	static digest_comparison_score_t compare_near(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_near(a, b);
-	}
-	static digest_comparison_score_t compare_near_eq(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_near_eq(a, b);
-	}
-	static digest_comparison_score_t compare_near_lt(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_near_lt(a, b);
-	}
-public:
-	digest_comparison_score_t compare(const digest_base& other) const noexcept
-	{
-		return compare(*this, other);
-	}
-	digest_comparison_score_t compare_identical(void) const noexcept
-	{
-		return compare_identical(*this);
-	}
-	digest_comparison_score_t compare_near(const digest_base& other) const noexcept
-	{
-		return compare_near(*this, other);
-	}
-	digest_comparison_score_t compare_near_eq(const digest_base& other) const noexcept
-	{
-		return compare_near_eq(*this, other);
-	}
-	digest_comparison_score_t compare_near_lt(const digest_base& other) const noexcept
-	{
-		return compare_near_lt(*this, other);
-	}
-
-	// Comparison (on different digests)
-public:
-	static digest_comparison_score_t compare_diff(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_diff(a, b);
-	}
-	static digest_comparison_score_t compare_near_diff(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_near_diff(a, b);
-	}
-	static digest_comparison_score_t compare_near_eq_diff(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_near_eq_diff(a, b);
-	}
-public:
-	digest_comparison_score_t compare_diff(const digest_base& other) const noexcept
-	{
-		return compare_diff(*this, other);
-	}
-	digest_comparison_score_t compare_near_diff(const digest_base& other) const noexcept
-	{
-		return compare_near_diff(*this, other);
-	}
-	digest_comparison_score_t compare_near_eq_diff(const digest_base& other) const noexcept
-	{
-		return compare_near_eq_diff(*this, other);
-	}
-};
-
-// Unnormalized form of digest (with normalization ability and slow comparison)
-template <bool IsShort>
-class digest_base<IsShort, false>
-	: public digest_data<IsShort>
-{
-public:
-	digest_base(void) noexcept = default;
-	digest_base(const digest_base& other) noexcept : digest_data<IsShort>(other) {}
-	digest_base(const digest_base<IsShort, true>& other) noexcept : digest_data<IsShort>(other) {}
-	const digest_base& operator=(const digest_base& other) noexcept
-	{
-		digest_data<IsShort>::operator=(other);
-		return *this;
-	}
-	const digest_base& operator=(const digest_base<IsShort, true>& other) noexcept
-	{
-		digest_data<IsShort>::operator=(other);
-		return *this;
-	}
-public:
-	explicit digest_base(const char* str) noexcept(false)
-	{
-		if (!digest_data<IsShort>::parse(*this, str))
-			throw digest_parse_error();
-	}
-	explicit digest_base(const std::string& str)
-		: digest_base(str.c_str()) {}
-	static bool parse_normalized(digest_base& digest, const char* str) noexcept
-	{
-		return digest_data<IsShort>::parse_normalized(digest, str);
-	}
-	static bool parse(digest_base& digest, const char* str) noexcept
-	{
-		return digest_data<IsShort>::parse(digest, str);
-	}
-public:
-	digest_base<IsShort, true> to_normalized(void) const noexcept
-	{
-		return digest_data<IsShort>::template normalize<digest_base<IsShort, true>>(*this);
-	}
-	explicit operator digest_base<IsShort, true>(void) const noexcept { return to_normalized(); }
-public:
-	static digest_comparison_score_t compare(
-		const digest_base& a,
-		const digest_base& b
-	) noexcept
-	{
-		return digest_comparison<IsShort>::compare_unnormalized(a, b);
-	}
-public:
-	digest_comparison_score_t compare(const digest_base& other) const noexcept { return compare(*this, other); }
-};
-
 
 // Wrapper class
 template <bool IsShort, bool IsNormalized> class digest;

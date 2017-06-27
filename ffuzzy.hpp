@@ -52,6 +52,7 @@
 #include "ffuzzypp/digest_blocksize.hpp"
 #include "ffuzzypp/digest_data.hpp"
 #include "ffuzzypp/digest_comparison.hpp"
+#include "ffuzzypp/digest_base.hpp"
 #include "ffuzzypp/digest.hpp"
 #include "ffuzzypp/digest_filesize.hpp"
 #include "ffuzzypp/digest_generator.hpp"

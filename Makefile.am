@@ -31,6 +31,7 @@ nobase_include_HEADERS = \
 	ffuzzypp/context_hash.hpp \
 	ffuzzypp/context_hash_fast.hpp \
 	ffuzzypp/digest.hpp \
+	ffuzzypp/digest_base.hpp \
 	ffuzzypp/digest_blocksize.hpp \
 	ffuzzypp/digest_comparison.hpp \
 	ffuzzypp/digest_data.hpp \
