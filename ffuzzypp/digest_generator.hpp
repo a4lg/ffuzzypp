@@ -284,7 +284,8 @@ public:
 	// High-level update utilities
 	// (by file pointer or by file name; w/ or w/o internal buffer)
 public:
-	template <size_t buffer_size = 4096>
+	static constexpr const size_t default_buffer_size = 4096;
+	template <size_t buffer_size = default_buffer_size>
 	bool update_by_stream(FILE* fp, unsigned char* tmpbuf) noexcept
 	{
 		static_assert(buffer_size != 0, "buffer_size must not be zero.");
@@ -301,14 +302,14 @@ public:
 			return true;
 		return false;
 	}
-	template <size_t buffer_size = 4096>
+	template <size_t buffer_size = default_buffer_size>
 	bool update_by_stream(FILE* fp) noexcept
 	{
 		static_assert(buffer_size != 0, "buffer_size must not be zero.");
 		unsigned char buf[buffer_size];
 		return update_by_stream<buffer_size>(fp, buf);
 	}
-	template <size_t buffer_size = 4096>
+	template <size_t buffer_size = default_buffer_size>
 	bool update_by_file(const char* filename) noexcept
 	{
 		static_assert(buffer_size != 0, "buffer_size must not be zero.");
@@ -319,7 +320,7 @@ public:
 		fclose(fp);
 		return ret;
 	}
-	template <size_t buffer_size = 4096>
+	template <size_t buffer_size = default_buffer_size>
 	bool update_by_file(const char* filename, unsigned char* tmpbuf) noexcept
 	{
 		static_assert(buffer_size != 0, "buffer_size must not be zero.");
