@@ -24,6 +24,7 @@
 #ifndef FFUZZYPP_DIGEST_FILESIZE_HPP
 #define FFUZZYPP_DIGEST_FILESIZE_HPP
 
+#include <cstddef>
 #include <cstdint>
 
 #include "digest_blocksize.hpp"

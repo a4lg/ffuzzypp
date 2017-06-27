@@ -39,7 +39,6 @@
 #include <cstddef>
 
 #include <algorithm>
-#include <limits>
 #include <string>
 
 #include "digest_blocksize.hpp"

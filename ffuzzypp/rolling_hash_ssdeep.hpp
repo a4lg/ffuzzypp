@@ -35,6 +35,7 @@
 #ifndef FFUZZYPP_ROLLING_HASH_SSDEEP_HPP
 #define FFUZZYPP_ROLLING_HASH_SSDEEP_HPP
 
+#include <cstddef>
 #include <cstdint>
 
 #include "rolling_hash.hpp"
