@@ -76,7 +76,7 @@ public:
 		return *this;
 	}
 public:
-	explicit digest_base(const char* str) throw(digest_parse_error)
+	explicit digest_base(const char* str) noexcept(false)
 	{
 		if (!digest_data<IsShort>::parse_normalized(*this, str))
 			throw digest_parse_error();
@@ -164,7 +164,7 @@ public:
 		return *this;
 	}
 public:
-	explicit digest_base(const char* str) throw(digest_parse_error)
+	explicit digest_base(const char* str) noexcept(false)
 	{
 		if (!digest_data<IsShort>::parse(*this, str))
 			throw digest_parse_error();
@@ -209,7 +209,7 @@ class digest<true, true>
 public:
 	digest(void) noexcept = default;
 	digest(const digest& other) noexcept : digest_base<true, true>(other) {}
-	explicit digest(const char* str) throw(digest_parse_error) : digest_base<true, true>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, true>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
@@ -230,7 +230,7 @@ public:
 	{
 		digest_data<true>::operator=(other);
 	}
-	explicit digest(const char* str) throw(digest_parse_error) : digest_base<true, false>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, false>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
@@ -256,7 +256,7 @@ public:
 	{
 		internal::digest_copy::copy(*this, other);
 	}
-	explicit digest(const char* str) throw(digest_parse_error) : digest_base<false, true>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, true>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
@@ -286,7 +286,7 @@ public:
 	{
 		internal::digest_copy::copy(*this, other);
 	}
-	explicit digest(const char* str) throw(digest_parse_error) : digest_base<false, false>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, false>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{

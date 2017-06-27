@@ -793,7 +793,7 @@ public:
 	static digest_comparison_score_t compare(
 		const char* a,
 		const char* b
-	) throw(digest_parse_error)
+	) noexcept(false)
 	{
 		digest_data<IsShort> da, db;
 		if (!digest_data<IsShort>::parse_normalized(da, a))
