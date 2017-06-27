@@ -84,7 +84,7 @@ public:
 	typedef strings::common_substr_fast<
 		digest_params::max_blockhash_len,
 		min_match_len
-	> substr_match_t;
+	> common_substr_t;
 	typedef strings::edit_dist_norm<
 		strings::edit_dist_nonempty_fast<digest_comparison_score_t, digest_params::max_blockhash_len>
 	> edit_dist_t;
@@ -218,7 +218,7 @@ public:
 		const char* s2, blockhash_len_t s2len
 	) noexcept
 	{
-		if (!substr_match_t::match(s1, size_t(s1len), s2, size_t(s2len)))
+		if (!common_substr_t::match(s1, size_t(s1len), s2, size_t(s2len)))
 			return 0;
 		return uncapped_score(
 			edit_dist_t::cost(s1, size_t(s1len), s2, size_t(s2len)),
@@ -281,7 +281,7 @@ public:
 			This function does not handle cases that s1 and s2 are identical.
 			For these cases, use score_identical function.
 		*/
-		if (!substr_match_t::match(s1, size_t(s1len), s2, size_t(s2len)))
+		if (!common_substr_t::match(s1, size_t(s1len), s2, size_t(s2len)))
 			return 0;
 		return score(
 			edit_dist_t::cost(s1, size_t(s1len), s2, size_t(s2len)),
@@ -593,8 +593,8 @@ private:
 
 	// Internal string interfaces
 public:
-	typedef blockhash_comparison::substr_match_t substr_match_t;
-	typedef blockhash_comparison::edit_dist_t    edit_dist_t;
+	typedef blockhash_comparison::common_substr_t common_substr_t;
+	typedef blockhash_comparison::edit_dist_t     edit_dist_t;
 
 	// Comparison (on identical digests)
 public:
@@ -682,7 +682,7 @@ public:
 					This makes second block hash comparison score zero.
 				*/
 				static_assert(blockhash_comparison::min_match_len > 1,
-					"block hash comparison must not match too substring with length 0 or 1 "
+					"if the block size is not safe to double, the second block hash should not match "
 					"(due to implementation restrictions).");
 				#if defined(FFUZZYPP_DEBUG) && 0
 				assert(a.blkhash2_len <= 1);
@@ -744,13 +744,13 @@ public:
 				block hash is empty or 1-character.
 				This makes second block hash comparison score zero.
 			*/
+			static_assert(blockhash_comparison::min_match_len > 1,
+				"if the block size is not safe to double, the second block hash should not match "
+				"(due to implementation restrictions).");
 			#if defined(FFUZZYPP_DEBUG) && 0
 			assert(a.blkhash2_len <= 1);
 			assert(b.blkhash2_len <= 1);
 			#endif
-			static_assert(blockhash_comparison::min_match_len > 1,
-				"block hash comparison must not match too substring with length 0 or 1 "
-				"(due to implementation restrictions).");
 			return blockhash_comparison::score(
 				a.digest, a.blkhash1_len,
 				b.digest, b.blkhash1_len,
