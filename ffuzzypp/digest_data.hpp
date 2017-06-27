@@ -397,13 +397,8 @@ private:
 		if (*rem++ != ':')
 			return false;
 		#ifndef FFUZZYPP_BLOCKDIGEST2_TERMS
-		#ifdef  FFUZZYPP_COMPATIBILITY_SEPARATORS
-		// original ssdeep/libfuzzy
+		// default from ffuzzy++ 4.0
 		#define FFUZZYPP_BLOCKDIGEST2_TERMS ','
-		#else
-		// make "UNIX new line" a terminator (incompatible with fuzzy_compare)
-		#define FFUZZYPP_BLOCKDIGEST2_TERMS ',', '\n'
-		#endif
 		#endif
 		if (!Tstring_copy<FFUZZYPP_BLOCKDIGEST2_TERMS>::
 			copy_elim_sequences(out, max_blockhash2_len, rem))

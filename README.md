@@ -121,11 +121,6 @@ Caution
 Differences between ssdeep
 ---------------------------
 
-Unlike ssdeep and libffuzzy 2.x, it supports `'\n'` as a terminator
-when you are parsing digests. It enables you to parse digest from
-the string read from `fgets` function (see usage of
-`FFUZZYPP_COMPATIBILITY_SEPARATORS` macro for details).
-
 When comparing identical digests, ssdeep 2.9 and 2.13 return different
 values. By default, ffuzzy++ emulates behavior of version 2.13.
 If you define `FFUZZYPP_COMPATIBILITY_SSDEEP_2_9`, ffuzzy++ will
