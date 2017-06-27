@@ -182,6 +182,7 @@ public:
 		const char* s2, size_t s2len
 	) noexcept
 	{
+		// Normalization: make s1 short for better effficiency
 		if (s1len <= s2len)
 			return Tedit_dist::cost(s1, s1len, s2, s2len);
 		else
@@ -202,7 +203,11 @@ public:
 		const char* s2, size_t s2len
 	) noexcept
 	{
-		return edit_dist_norm<Tedit_dist>::cost(s2, s2len, s1, s1len);
+		// Reverse normalization: make s2 short for (possibly) worst effficiency
+		if (s1len <= s2len)
+			return Tedit_dist::cost(s2, s2len, s1, s1len);
+		else
+			return Tedit_dist::cost(s1, s1len, s2, s2len);
 	}
 };
 
