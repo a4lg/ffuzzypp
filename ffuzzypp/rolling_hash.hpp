@@ -29,7 +29,7 @@
 
 	CREDIT OF MODIFIED PORTIONS
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 */
 #ifndef FFUZZYPP_ROLLING_HASH_HPP
@@ -37,7 +37,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 
 namespace ffuzzy {
 
@@ -53,14 +52,9 @@ protected:
 public:
 	void reset(void) noexcept
 	{
-		#if 0
 		h1 = h2 = h3 = n = 0;
 		for (size_t i = 0; i < window_size; i++)
 			window[i] = 0;
-		#else
-		// is it okay?
-		memset(this, 0, sizeof(*this));
-		#endif
 	}
 	void update(unsigned char c) noexcept
 	{
