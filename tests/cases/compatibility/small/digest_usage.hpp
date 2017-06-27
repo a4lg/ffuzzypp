@@ -35,7 +35,11 @@ typedef ::testing::Types<
 	digest_t,
 	digest_unorm_t,
 	digest_long_t,
-	digest_long_unorm_t
+	digest_long_unorm_t,
+	digest_ra_t,
+	digest_ra_unorm_t,
+	digest_ra_long_t,
+	digest_ra_long_unorm_t
 > DigestUsageTestsGenericTypes;
 TYPED_TEST_CASE(DigestUsageTestsGeneric, DigestUsageTestsGenericTypes);
 
@@ -121,7 +125,9 @@ class DigestUsageTestsGenericNormalized : public ::testing::Test {};
 
 typedef ::testing::Types<
 	digest_t,
-	digest_long_t
+	digest_long_t,
+	digest_ra_t,
+	digest_ra_long_t
 > DigestUsageTestsGenericNormalizedTypes;
 TYPED_TEST_CASE(DigestUsageTestsGenericNormalized, DigestUsageTestsGenericNormalizedTypes);
 
@@ -194,17 +200,72 @@ TYPED_TEST(DigestUsageTestsGenericNormalized, BasicComparisonLt)
 
 TEST(DigestUsageTests, Conversion)
 {
-	digest_t            d0("3:ABC:DEF");
-	digest_unorm_t      d1(d0); d1 = d0;
-	digest_long_t       d2(d0); d2 = d0;
-	digest_long_unorm_t d3(d0); d3 = d0;
-	digest_long_unorm_t d4(d1); d4 = d1;
-	digest_long_unorm_t d5(d2); d5 = d2;
-	EXPECT_EQ("3:ABC:DEF", d1.pretty());
-	EXPECT_EQ("3:ABC:DEF", d2.pretty());
-	EXPECT_EQ("3:ABC:DEF", d3.pretty());
-	EXPECT_EQ("3:ABC:DEF", d4.pretty());
-	EXPECT_EQ("3:ABC:DEF", d5.pretty());
+	// non-RA to non-RA conversions
+	{
+		digest_t            d0("3:ABC:DEF");
+		digest_unorm_t      d1(d0); d1 = d0;
+		digest_long_t       d2(d0); d2 = d0;
+		digest_long_unorm_t d3(d0); d3 = d0;
+		digest_long_unorm_t d4(d1); d4 = d1;
+		digest_long_unorm_t d5(d2); d5 = d2;
+		EXPECT_EQ("3:ABC:DEF", d1.pretty());
+		EXPECT_EQ("3:ABC:DEF", d2.pretty());
+		EXPECT_EQ("3:ABC:DEF", d3.pretty());
+		EXPECT_EQ("3:ABC:DEF", d4.pretty());
+		EXPECT_EQ("3:ABC:DEF", d5.pretty());
+	}
+	// RA to RA conversions
+	{
+		digest_ra_t            d0("3:ABC:DEF");
+		digest_ra_unorm_t      d1(d0); d1 = d0;
+		digest_ra_long_t       d2(d0); d2 = d0;
+		digest_ra_long_unorm_t d3(d0); d3 = d0;
+		digest_ra_long_unorm_t d4(d1); d4 = d1;
+		digest_ra_long_unorm_t d5(d2); d5 = d2;
+		EXPECT_EQ("3:ABC:DEF", d1.pretty());
+		EXPECT_EQ("3:ABC:DEF", d2.pretty());
+		EXPECT_EQ("3:ABC:DEF", d3.pretty());
+		EXPECT_EQ("3:ABC:DEF", d4.pretty());
+		EXPECT_EQ("3:ABC:DEF", d5.pretty());
+	}
+	// RA to non-RA conversions (same sort)
+	{
+		digest_ra_t            d0("3:ABC:DEF");
+		digest_ra_unorm_t      d1(d0); d1 = d0;
+		digest_ra_long_t       d2(d0); d2 = d0;
+		digest_ra_long_unorm_t d3(d0); d3 = d0;
+		digest_t               d4(d0); d4 = d0;
+		digest_unorm_t         d5(d1); d5 = d1;
+		digest_long_t          d6(d2); d6 = d2;
+		digest_long_unorm_t    d7(d3); d7 = d3;
+		EXPECT_EQ("3:ABC:DEF", d1.pretty());
+		EXPECT_EQ("3:ABC:DEF", d2.pretty());
+		EXPECT_EQ("3:ABC:DEF", d3.pretty());
+		EXPECT_EQ("3:ABC:DEF", d4.pretty());
+		EXPECT_EQ("3:ABC:DEF", d5.pretty());
+		EXPECT_EQ("3:ABC:DEF", d6.pretty());
+		EXPECT_EQ("3:ABC:DEF", d7.pretty());
+	}
+	// RA to non-RA conversions (from short normalized digest)
+	{
+		digest_ra_t         d0("3:ABC:DEF");
+		digest_unorm_t      d1(d0); d1 = d0;
+		digest_long_t       d2(d0); d2 = d0;
+		digest_long_unorm_t d3(d0); d3 = d0;
+		EXPECT_EQ("3:ABC:DEF", d1.pretty());
+		EXPECT_EQ("3:ABC:DEF", d2.pretty());
+		EXPECT_EQ("3:ABC:DEF", d3.pretty());
+	}
+	// RA to non-RA conversions
+	// (to long unnormalized digest and NOT from short normalized digest)
+	{
+		digest_ra_long_t    d0("3:ABC:DEF");
+		digest_ra_unorm_t   d1("3:ABC:DEF");
+		digest_long_unorm_t d2(d0); d2 = d0;
+		digest_long_unorm_t d3(d1); d3 = d1;
+		EXPECT_EQ("3:ABC:DEF", d2.pretty());
+		EXPECT_EQ("3:ABC:DEF", d3.pretty());
+	}
 }
 
 TEST(DigestUsageTests, BasicComparisonNonTemplate)

@@ -29,7 +29,7 @@
 
 	CREDIT OF MODIFIED PORTIONS
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 */
 #ifndef FFUZZYPP_DIGEST_DATA_HPP
@@ -84,6 +84,31 @@ public:
 };
 
 
+template <bool IsAlphabetRestricted> class digest_data_transformation;
+
+template<>
+class digest_data_transformation<true>
+{
+private:
+	digest_data_transformation(void) = delete;
+	digest_data_transformation(const digest_data_transformation&) = delete;
+public:
+	typedef base64::transform_from_b64 input_type;
+	typedef base64::transform_to_b64   output_type;
+};
+
+template<>
+class digest_data_transformation<false>
+{
+private:
+	digest_data_transformation(void) = delete;
+	digest_data_transformation(const digest_data_transformation&) = delete;
+public:
+	typedef strings::default_char_transform input_type;
+	typedef strings::default_char_transform output_type;
+};
+
+
 // Friend classes for digest_data class
 enum struct comparison_version;
 namespace internal
@@ -94,7 +119,7 @@ namespace internal
 template <comparison_version> class digest_comparison;
 
 // Data structure for fuzzy digest (as base class)
-template <bool IsShort>
+template <bool IsAlphabetRestricted, bool IsShort>
 class digest_data
 {
 	static_assert(digest_params::max_blockhash_len >= 4,
@@ -194,6 +219,12 @@ public:
 			return false;
 		if (blksize > 0xfffffffful)
 			return false;
+		if (IsAlphabetRestricted)
+		{
+			for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
+				if (digest[i] < char(0) || 64 <= digest[i])
+					return false;
+		}
 		return true;
 	}
 	bool is_natural(void) const noexcept
@@ -206,9 +237,12 @@ public:
 			return false;
 		if (!digest_blocksize::is_safe_to_double(blksize) && blkhash2_len >= 2)
 			return false;
-		for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
-			if (!base64::isbase64(digest[i]))
-				return false;
+		if (!IsAlphabetRestricted)
+		{
+			for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
+				if (!base64::isbase64(digest[i]))
+					return false;
+		}
 		return true;
 	}
 	bool is_blocksize_natural(void) const noexcept
@@ -225,6 +259,26 @@ public:
 				::has_sequences(digest, blkhash1_len) &&
 			!strings::sequences<digest_params::max_blockhash_sequence>
 				::has_sequences(digest+blkhash1_len, blkhash2_len);
+	}
+	bool has_valid_base64_data(void) const noexcept
+	{
+		if (blkhash1_len > max_blockhash1_len)
+			return false;
+		if (blkhash2_len > max_blockhash2_len)
+			return false;
+		if (IsAlphabetRestricted)
+		{
+			for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
+				if (digest[i] < char(0) || 64 <= digest[i])
+					return false;
+		}
+		else
+		{
+			for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
+				if (!base64::isbase64(digest[i]))
+					return false;
+		}
+		return true;
 	}
 
 	// Equality
@@ -251,6 +305,7 @@ public:
 	friend bool operator!=(const digest_data& a, const digest_data& b) noexcept { return !is_eq(a, b); }
 
 	// Default comparison for sorting (in "dictionary" order or whatever)
+	// Note that sort order differs depending on IsAlphabetRestricted.
 public:
 	friend bool operator<(const digest_data& a, const digest_data& b) noexcept
 	{
@@ -435,13 +490,21 @@ private:
 			copy_elim_sequences(out, max_blockhash2_len, rem))
 			return false;
 		digest.blkhash2_len = out - outtmp;
+		if (IsAlphabetRestricted)
+		{
+			for (blockhash_len_t i = 0; i < digest.blkhash1_len + digest.blkhash2_len; i++)
+			{
+				if (digest.digest[i] == base64::invalid_index)
+					return false;
+			}
+		}
 		return true;
 	}
 protected:
 	static bool parse(digest_data& digest, const char* str) noexcept
 	{
 		return parse_internal<
-			strings::nosequences<>::string_copy
+			strings::nosequences<typename digest_data_transformation<IsAlphabetRestricted>::input_type>::template string_copy
 		>(digest, str);
 	}
 	static bool parse(digest_data& digest, const std::string& str)
@@ -451,7 +514,8 @@ protected:
 	static bool parse_normalized(digest_data& digest, const char* str) noexcept
 	{
 		return parse_internal<
-			strings::sequences<digest_params::max_blockhash_sequence>::string_copy
+			strings::sequences<digest_params::max_blockhash_sequence,
+				typename digest_data_transformation<IsAlphabetRestricted>::input_type>::template string_copy
 		>(digest, str);
 	}
 	static bool parse_normalized(digest_data& digest, const std::string& str)
@@ -470,10 +534,10 @@ public:
 		if (n < 0)
 			return false;
 		out += n;
-		memcpy(out, digest, blkhash1_len);
+		strings::nosequences<typename digest_data_transformation<IsAlphabetRestricted>::output_type>::copy_raw(out, digest, blkhash1_len);
 		out += blkhash1_len;
 		*out++ = ':';
-		memcpy(out, digest+blkhash1_len, blkhash2_len);
+		strings::nosequences<typename digest_data_transformation<IsAlphabetRestricted>::output_type>::copy_raw(out, digest+blkhash1_len, blkhash2_len);
 		out[blkhash2_len] = '\0';
 		return true;
 	}
@@ -491,10 +555,10 @@ public:
 		out += n;
 		if (outsize < size_t(blkhash1_len) + size_t(blkhash2_len) + 2)
 			return false;
-		memcpy(out, digest, blkhash1_len);
+		strings::nosequences<typename digest_data_transformation<IsAlphabetRestricted>::output_type>::copy_raw(out, digest, blkhash1_len);
 		out += blkhash1_len;
 		*out++ = ':';
-		memcpy(out, digest+blkhash1_len, blkhash2_len);
+		strings::nosequences<typename digest_data_transformation<IsAlphabetRestricted>::output_type>::copy_raw(out, digest+blkhash1_len, blkhash2_len);
 		out[blkhash2_len] = '\0';
 		return true;
 	}
@@ -506,9 +570,11 @@ public:
 		unsigned long bs(blksize);
 		std::string str(std::to_string(bs));
 		str.push_back(':');
-		str.insert(str.end(), digest, digest + blkhash1_len);
+		for (blockhash_len_t i = 0; i < blkhash1_len; i++)
+			str.push_back(digest_data_transformation<IsAlphabetRestricted>::output_type::transform(digest[i]));
 		str.push_back(':');
-		str.insert(str.end(), digest + blkhash1_len, digest + blkhash1_len + blkhash2_len);
+		for (blockhash_len_t i = 0; i < blkhash2_len; i++)
+			str.push_back(digest_data_transformation<IsAlphabetRestricted>::output_type::transform(digest[blkhash1_len + i]));
 		return str;
 	}
 
@@ -522,14 +588,18 @@ public:
 
 namespace internal
 {
-	// Utility to copy short digest to long one
+	// Utility to copy constrained digest data to non-constrained digest object
 	class digest_copy
 	{
 	private:
 		digest_copy(void) = delete;
 		digest_copy(const digest_copy&) = delete;
 	public:
-		static void copy(digest_data<false>& dest, const digest_data<true>& src) noexcept
+		template <bool IsAlphabetRestricted>
+		static void copy_to_long(
+			digest_data<IsAlphabetRestricted, false>& dest,
+			const digest_data<IsAlphabetRestricted, true>& src
+		) noexcept
 		{
 			#ifdef FFUZZYPP_DEBUG
 			assert(src.is_valid());
@@ -538,6 +608,35 @@ namespace internal
 			dest.blkhash2_len = src.blkhash2_len;
 			dest.blksize = src.blksize;
 			memcpy(dest.digest, src.digest, src.blkhash1_len + src.blkhash2_len);
+		}
+		template <bool IsShort>
+		static void copy_to_non_ra(
+			digest_data<false, IsShort>& dest,
+			const digest_data<true, IsShort>& src
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(src.is_valid());
+			#endif
+			dest.blkhash1_len = src.blkhash1_len;
+			dest.blkhash2_len = src.blkhash2_len;
+			dest.blksize = src.blksize;
+			strings::nosequences<base64::transform_to_b64>::
+				copy_raw(dest.digest, src.digest, src.blkhash1_len + src.blkhash2_len);
+		}
+		static void copy_to_long_non_ra(
+			digest_data<false, false>& dest,
+			const digest_data<true, true>& src
+		) noexcept
+		{
+			#ifdef FFUZZYPP_DEBUG
+			assert(src.is_valid());
+			#endif
+			dest.blkhash1_len = src.blkhash1_len;
+			dest.blkhash2_len = src.blkhash2_len;
+			dest.blksize = src.blksize;
+			strings::nosequences<base64::transform_to_b64>::
+				copy_raw(dest.digest, src.digest, src.blkhash1_len + src.blkhash2_len);
 		}
 	};
 }

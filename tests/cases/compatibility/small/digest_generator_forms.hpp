@@ -114,14 +114,14 @@ TEST(DigestGeneratorResultFormTests, CopyDigestNormalizedTest)
 	DigestGeneratorInitialGuessTests::fill_seq(gen, 64, 1536);
 	digest_unorm_t ds;
 	digest_long_unorm_t dl;
-	EXPECT_TRUE((gen.copy_digest_normalized<true>(ds)));
+	EXPECT_TRUE((gen.copy_digest_normalized<false, true>(ds)));
 	EXPECT_EQ("24:000:000U", ds.pretty());
-	EXPECT_TRUE((gen.copy_digest_normalized<false>(dl)));
+	EXPECT_TRUE((gen.copy_digest_normalized<false, false>(dl)));
 	EXPECT_EQ("24:000:000U", dl.pretty());
-	EXPECT_TRUE((gen.copy_digest_normalized<false, true>(dl)));
+	EXPECT_TRUE((gen.copy_digest_normalized<false, false, true>(dl)));
 	EXPECT_EQ("24:000:000U", dl.pretty());
 	// expect no 'U' at the tail
-	EXPECT_TRUE((gen.copy_digest_normalized<false, false>(dl)));
+	EXPECT_TRUE((gen.copy_digest_normalized<false, false, false>(dl)));
 	EXPECT_EQ("24:000:000", dl.pretty());
 }
 

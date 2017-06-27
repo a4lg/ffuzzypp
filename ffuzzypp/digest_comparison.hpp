@@ -643,9 +643,9 @@ namespace internal
 
 		// Comparison (on identical digests)
 	public:
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_identical_2_9(
-			const digest_data<IsShort>& a
+			const digest_data<IsAlphabetRestricted, IsShort>& a
 		) noexcept
 		{
 			if (digest_blocksize::is_safe_to_double(a.blksize))
@@ -672,10 +672,10 @@ namespace internal
 
 		// Comparison (on different digests)
 	public:
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_near_diff(
-			const digest_data<IsShort>& a,
-			const digest_data<IsShort>& b
+			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
 		) noexcept
 		{
 			#ifdef FFUZZYPP_DEBUG
@@ -738,10 +738,10 @@ namespace internal
 					return 0;
 			}
 		}
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_diff(
-			const digest_data<IsShort>& a,
-			const digest_data<IsShort>& b
+			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
 		) noexcept
 		{
 			if (!digest_blocksize::is_near(a.blksize, b.blksize))
@@ -751,10 +751,10 @@ namespace internal
 
 		// Comparison (on different digests; specialized versions)
 	public:
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_near_eq_diff(
-			const digest_data<IsShort>& a,
-			const digest_data<IsShort>& b
+			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
 		) noexcept
 		{
 			#ifdef FFUZZYPP_DEBUG
@@ -794,10 +794,10 @@ namespace internal
 					a.blksize);
 			}
 		}
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_near_lt(
-			const digest_data<IsShort>& a,
-			const digest_data<IsShort>& b
+			const digest_data<IsAlphabetRestricted, IsShort>& a,
+			const digest_data<IsAlphabetRestricted, IsShort>& b
 		) noexcept
 		{
 			#ifdef FFUZZYPP_DEBUG
@@ -825,9 +825,9 @@ namespace internal
 		digest_comparison_base_1(void) = delete;
 		digest_comparison_base_1(const digest_comparison_base_1&) = delete;
 	public:
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_identical(
-			const digest_data<IsShort>& a
+			const digest_data<IsAlphabetRestricted, IsShort>& a
 		) noexcept
 		{
 			return 100;
@@ -842,9 +842,9 @@ namespace internal
 		digest_comparison_base_1(void) = delete;
 		digest_comparison_base_1(const digest_comparison_base_1&) = delete;
 	public:
-		template <bool IsShort>
+		template <bool IsAlphabetRestricted, bool IsShort>
 		static digest_comparison_score_t compare_identical(
-			const digest_data<IsShort>& a
+			const digest_data<IsAlphabetRestricted, IsShort>& a
 		) noexcept
 		{
 			return digest_comparison_base<comparison_version::v2_9>::compare_identical_2_9(a);
@@ -864,10 +864,10 @@ private:
 
 	// Comparison (possibly equivalent)
 public:
-	template <bool IsShort>
+	template <bool IsAlphabetRestricted, bool IsShort>
 	static digest_comparison_score_t compare_near(
-		const digest_data<IsShort>& a,
-		const digest_data<IsShort>& b
+		const digest_data<IsAlphabetRestricted, IsShort>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
 	) noexcept
 	{
 		if (a == b)
@@ -877,23 +877,23 @@ public:
 
 	// Specialized comparison (possibly equivalent)
 public:
-	template <bool IsShort>
+	template <bool IsAlphabetRestricted, bool IsShort>
 	static digest_comparison_score_t compare_near_eq(
-		const digest_data<IsShort>& a,
-		const digest_data<IsShort>& b
+		const digest_data<IsAlphabetRestricted, IsShort>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
 	) noexcept
 	{
-		if (digest_data<IsShort>::is_eq_except_blocksize(a, b))
+		if (digest_data<IsAlphabetRestricted, IsShort>::is_eq_except_blocksize(a, b))
 			return base_type::compare_identical(b);
 		return base_type::compare_near_eq_diff(a, b);
 	}
 
 	// Comparison (for normalized digests)
 public:
-	template <bool IsShort>
+	template <bool IsAlphabetRestricted, bool IsShort>
 	static digest_comparison_score_t compare(
-		const digest_data<IsShort>& a,
-		const digest_data<IsShort>& b
+		const digest_data<IsAlphabetRestricted, IsShort>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
 	) noexcept
 	{
 		if (!digest_blocksize::is_near(a.blksize, b.blksize))
@@ -903,30 +903,30 @@ public:
 
 	// Comparison (for unnormalized form of digests)
 public:
-	template <bool IsShort>
+	template <bool IsAlphabetRestricted, bool IsShort>
 	static digest_comparison_score_t compare_unnormalized(
-		const digest_data<IsShort>& a,
-		const digest_data<IsShort>& b
+		const digest_data<IsAlphabetRestricted, IsShort>& a,
+		const digest_data<IsAlphabetRestricted, IsShort>& b
 	) noexcept
 	{
 		return compare(
-			digest_data<IsShort>::normalize(a),
-			digest_data<IsShort>::normalize(b)
+			digest_data<IsAlphabetRestricted, IsShort>::normalize(a),
+			digest_data<IsAlphabetRestricted, IsShort>::normalize(b)
 		);
 	}
 
 	// Comparison (for strings)
 public:
-	template <bool IsShort = false>
+	template <bool IsAlphabetRestricted = false, bool IsShort = false>
 	static digest_comparison_score_t compare(
 		const char* a,
 		const char* b
 	) noexcept(false)
 	{
-		digest_data<IsShort> da, db;
-		if (!digest_data<IsShort>::parse_normalized(da, a))
+		digest_data<IsAlphabetRestricted, IsShort> da, db;
+		if (!digest_data<IsAlphabetRestricted, IsShort>::parse_normalized(da, a))
 			throw digest_parse_error();
-		if (!digest_data<IsShort>::parse_normalized(db, b))
+		if (!digest_data<IsAlphabetRestricted, IsShort>::parse_normalized(db, b))
 			throw digest_parse_error();
 		return compare(da, db);
 	}

@@ -339,8 +339,8 @@ private:
 		return bi;
 	}
 	// Copy the final (resulting) digest
-	template <typename Tseq, bool IsShort, bool Shortened>
-	bool copy_digest_internal(digest_data<IsShort>& digest) noexcept
+	template <typename Tseq, bool IsAlphabetRestricted, bool IsShort, bool Shortened>
+	bool copy_digest_internal(digest_data<IsAlphabetRestricted, IsShort>& digest) noexcept
 	{
 		/*
 			This function is not exactly "const" but mostly constant.
@@ -421,67 +421,66 @@ private:
 
 	// Digest finalization (and copying) utilities
 private:
-	template <bool IsShort, bool Shortened>
-	bool copy_digest_base(digest_data<IsShort>& digest) noexcept
+	template <bool IsAlphabetRestricted, bool IsShort, bool Shortened>
+	bool copy_digest_base(digest_data<IsAlphabetRestricted, IsShort>& digest) noexcept
 	{
 		return copy_digest_internal<
-				strings::nosequences<digest_transform_t>,
-			IsShort, Shortened>(digest);
+				strings::nosequences<
+					typename digest_data_transformation<!IsAlphabetRestricted>::output_type
+				>,
+			IsAlphabetRestricted, IsShort, Shortened>(digest);
 	}
 public:
-	template <bool IsShort, bool Shortened = true>
-	bool copy_digest_normalized(digest_data<IsShort>& digest) noexcept
+	template <bool IsAlphabetRestricted, bool IsShort, bool Shortened = true>
+	bool copy_digest_normalized(digest_data<IsAlphabetRestricted, IsShort>& digest) noexcept
 	{
 		return copy_digest_internal<
 			strings::sequences<
 				digest_params::max_blockhash_sequence,
-				digest_transform_t
-			>, IsShort, Shortened
+				typename digest_data_transformation<!IsAlphabetRestricted>::output_type
+			>, IsAlphabetRestricted, IsShort, Shortened
 		>(digest);
 	}
-	bool copy_digest(digest_base<true, true>& digest) noexcept
+	template <bool IsAlphabetRestricted, bool IsShort>
+	bool copy_digest(digest_base<IsAlphabetRestricted, IsShort, true>& digest) noexcept
 	{
-		return copy_digest_normalized<true, true>(digest);
+		return copy_digest_normalized<IsAlphabetRestricted, IsShort, true>(digest);
 	}
-	bool copy_digest(digest_base<true, false>& digest) noexcept
+	template <bool IsAlphabetRestricted, bool IsShort>
+	bool copy_digest(digest_base<IsAlphabetRestricted, IsShort, false>& digest) noexcept
 	{
-		return copy_digest_base<true, true>(digest);
-	}
-	bool copy_digest(digest_base<false, true>& digest) noexcept
-	{
-		return copy_digest_normalized<false, true>(digest);
-	}
-	bool copy_digest(digest_base<false, false>& digest) noexcept
-	{
-		return copy_digest_base<false, true>(digest);
+		return copy_digest_base<IsAlphabetRestricted, IsShort, true>(digest);
 	}
 public:
-	bool copy_digest_long_normalized(digest_base<false, true>& digest) noexcept
+	template <bool IsAlphabetRestricted>
+	bool copy_digest_long_normalized(digest_base<IsAlphabetRestricted, false, true>& digest) noexcept
 	{
-		return copy_digest_normalized<false, false>(digest);
+		return copy_digest_normalized<IsAlphabetRestricted, false, false>(digest);
 	}
-	bool copy_digest_long(digest_base<false, true>& digest) noexcept
+	template <bool IsAlphabetRestricted>
+	bool copy_digest_long(digest_base<IsAlphabetRestricted, false, true>& digest) noexcept
 	{
-		return copy_digest_normalized<false, false>(digest);
+		return copy_digest_normalized<IsAlphabetRestricted, false, false>(digest);
 	}
-	bool copy_digest_long(digest_base<false, false>& digest) noexcept
+	template <bool IsAlphabetRestricted>
+	bool copy_digest_long(digest_base<IsAlphabetRestricted, false, false>& digest) noexcept
 	{
-		return copy_digest_base<false, false>(digest);
+		return copy_digest_base<IsAlphabetRestricted, false, false>(digest);
 	}
 private:
-	template <typename T, bool IsShort, bool IsNormalized, bool Shortened = true>
+	template <typename T, bool IsAlphabetRestricted, bool IsShort, bool IsNormalized, bool Shortened = true>
 	T digest_in_type(void)
 	{
 		// This object to be erased by NRVO.
 		T d;
 		if (IsNormalized)
 		{
-			if (!copy_digest_normalized<IsShort, Shortened>(d))
+			if (!copy_digest_normalized<IsAlphabetRestricted, IsShort, Shortened>(d))
 				throw digest_generator_error();
 		}
 		else
 		{
-			if (!copy_digest_base<IsShort, Shortened>(d))
+			if (!copy_digest_base<IsAlphabetRestricted, IsShort, Shortened>(d))
 				throw digest_generator_error();
 		}
 		return d;
@@ -490,7 +489,7 @@ public:
 	digest_unorm_t digest(void)
 	{
 		// Default options as you need (unnormalized; short form)
-		return digest_in_type<digest_unorm_t, true, false>();
+		return digest_in_type<digest_unorm_t, false, true, false>();
 	}
 	std::string digest_str(void)
 	{
@@ -500,16 +499,35 @@ public:
 	template <bool Shortened = false>
 	digest_long_unorm_t digest_long(void)
 	{
-		return digest_in_type<digest_long_unorm_t, false, false, Shortened>();
+		return digest_in_type<digest_long_unorm_t, false, false, false, Shortened>();
 	}
 	digest_t digest_normalized(void)
 	{
-		return digest_in_type<digest_t, true, true>();
+		return digest_in_type<digest_t, false, true, true>();
 	}
 	template <bool Shortened = false>
 	digest_long_t digest_long_normalized(void)
 	{
-		return digest_in_type<digest_long_t, false, true, Shortened>();
+		return digest_in_type<digest_long_t, false, false, true, Shortened>();
+	}
+public:
+	digest_ra_unorm_t digest_ra(void)
+	{
+		return digest_in_type<digest_ra_unorm_t, true, true, false>();
+	}
+	template <bool Shortened = false>
+	digest_ra_long_unorm_t digest_ra_long(void)
+	{
+		return digest_in_type<digest_ra_long_unorm_t, true, false, false, Shortened>();
+	}
+	digest_ra_t digest_ra_normalized(void)
+	{
+		return digest_in_type<digest_ra_t, true, true, true>();
+	}
+	template <bool Shortened = false>
+	digest_ra_long_t digest_ra_long_normalized(void)
+	{
+		return digest_in_type<digest_ra_long_t, true, false, true, Shortened>();
 	}
 
 	// Constructors

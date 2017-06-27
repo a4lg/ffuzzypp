@@ -29,7 +29,7 @@
 
 	CREDIT OF MODIFIED PORTIONS
 
-	Copyright (C) 2015 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 */
 #ifndef FFUZZYPP_DIGEST_HPP
@@ -46,141 +46,325 @@
 
 namespace ffuzzy {
 
-
-/*
-	Digest Types:
-
-	digest_data<IsShort>
-		Base class which holds the most basic information for fuzzy digest
-	digest_base<IsShort, IsNormalized>
-		Base class to provide common implementation for digest.
-		This type is partially specialized by IsNormalized parameter.
-	digest<IsShort, IsNormalized>
-		Final class you want to use.
-		This type is specialized by both parameters.
-*/
-
 // Wrapper class
-template <bool IsShort, bool IsNormalized> class digest;
+template <bool IsAlphabetRestricted, bool IsShort, bool IsNormalized> class digest;
 
-// Digest (short; normalized)
+// Digest (alphabet restricted; short; normalized)
 template <>
-class digest<true, true>
-	: public digest_base<true, true>
+class digest<true, true, true>
+	: public digest_base<true, true, true>
 {
 public:
-	digest(void) noexcept = default;
-	digest(const digest& other) noexcept : digest_base<true, true>(other) {}
-	explicit digest(const char* str) noexcept(false) : digest_base<true, true>(str) {}
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<true, true, true>(other) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, true, true>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
-		digest_base<true, true>::operator=(other);
+		digest_base<true, true, true>::operator=(other);
 		return *this;
 	}
 };
 
-// Digest (short; unnormalized)
+// Digest (alphabet restricted; short; unnormalized)
 template <>
-class digest<true, false>
-	: public digest_base<true, false>
+class digest<true, true, false>
+	: public digest_base<true, true, false>
 {
 public:
-	digest(void) noexcept = default;
-	digest(const digest& other) noexcept : digest_base<true, false>(other) {}
-	digest(const digest<true, true>& other) noexcept
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<true, true, false>(other) {}
+	digest(const digest<true, true, true>& other) noexcept
 	{
-		digest_data<true>::operator=(other);
+		digest_data<true, true>::operator=(other);
 	}
-	explicit digest(const char* str) noexcept(false) : digest_base<true, false>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, true, false>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
-		digest_base<true, false>::operator=(other);
+		digest_base<true, true, false>::operator=(other);
 		return *this;
 	}
-	const digest& operator=(const digest<true, true>& other) noexcept
+	const digest& operator=(const digest<true, true, true>& other) noexcept
 	{
-		digest_data<true>::operator=(other);
+		digest_data<true, true>::operator=(other);
 		return *this;
 	}
 };
 
-// Digest (long; normalized)
+// Digest (alphabet restricted; long; normalized)
 template <>
-class digest<false, true>
-	: public digest_base<false, true>
+class digest<true, false, true>
+	: public digest_base<true, false, true>
 {
 public:
-	digest(void) noexcept = default;
-	digest(const digest& other) noexcept : digest_base<false, true>(other) {}
-	digest(const digest<true, true>& other) noexcept
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<true, false, true>(other) {}
+	digest(const digest<true, true, true>& other) noexcept
 	{
-		internal::digest_copy::copy(*this, other);
+		internal::digest_copy::copy_to_long(*this, other);
 	}
-	explicit digest(const char* str) noexcept(false) : digest_base<false, true>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, false, true>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
-		digest_base<false, true>::operator=(other);
+		digest_base<true, false, true>::operator=(other);
 		return *this;
 	}
-	const digest& operator=(const digest<true, true>& other) noexcept
+	const digest& operator=(const digest<true, true, true>& other) noexcept
 	{
-		internal::digest_copy::copy(*static_cast<digest_data<false>*>(this), other);
+		internal::digest_copy::copy_to_long(*this, other);
 		return *this;
 	}
 };
 
-// Digest (long; unnormalized)
+// Digest (alphabet restricted; long; unnormalized)
 template <>
-class digest<false, false>
-	: public digest_base<false, false>
+class digest<true, false, false>
+	: public digest_base<true, false, false>
 {
 public:
-	digest(void) noexcept = default;
-	digest(const digest& other) noexcept : digest_base<false, false>(other) {}
-	digest(const digest<false, true>& other) noexcept
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<true, false, false>(other) {}
+	digest(const digest<true, false, true>& other) noexcept
 	{
-		digest_data<false>::operator=(other);
+		digest_data<true, false>::operator=(other);
 	}
-	digest(const digest<true, false>& other) noexcept
+	digest(const digest<true, true, false>& other) noexcept
 	{
-		internal::digest_copy::copy(*this, other);
+		internal::digest_copy::copy_to_long(*this, other);
 	}
-	digest(const digest<true, true>& other) noexcept
+	digest(const digest<true, true, true>& other) noexcept
 	{
-		internal::digest_copy::copy(*this, other);
+		internal::digest_copy::copy_to_long(*this, other);
 	}
-	explicit digest(const char* str) noexcept(false) : digest_base<false, false>(str) {}
+	explicit digest(const char* str) noexcept(false) : digest_base<true, false, false>(str) {}
 	explicit digest(const std::string& str) : digest(str.c_str()) {}
 	const digest& operator=(const digest& other) noexcept
 	{
-		digest_base<false, false>::operator=(other);
+		digest_base<true, false, false>::operator=(other);
 		return *this;
 	}
-	const digest& operator=(const digest<false, true>& other) noexcept
+	const digest& operator=(const digest<true, false, true>& other) noexcept
 	{
-		digest_data<false>::operator=(other);
+		digest_data<true, false>::operator=(other);
 		return *this;
 	}
-	const digest& operator=(const digest<true, false>& other) noexcept
+	const digest& operator=(const digest<true, true, false>& other) noexcept
 	{
-		internal::digest_copy::copy(*static_cast<digest_data<false>*>(this), other);
+		internal::digest_copy::copy_to_long(*this, other);
 		return *this;
 	}
-	const digest& operator=(const digest<true, true>& other) noexcept
+	const digest& operator=(const digest<true, true, true>& other) noexcept
 	{
-		internal::digest_copy::copy(*static_cast<digest_data<false>*>(this), other);
+		internal::digest_copy::copy_to_long(*this, other);
+		return *this;
+	}
+};
+
+// Digest (alphabet not restricted; short; normalized)
+template <>
+class digest<false, true, true>
+	: public digest_base<false, true, true>
+{
+public:
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<false, true, true>(other) {}
+	digest(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, true, true>(str) {}
+	explicit digest(const std::string& str) : digest(str.c_str()) {}
+	const digest& operator=(const digest& other) noexcept
+	{
+		digest_base<false, true, true>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+};
+
+// Digest (alphabet not restricted; short; unnormalized)
+template <>
+class digest<false, true, false>
+	: public digest_base<false, true, false>
+{
+public:
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<false, true, false>(other) {}
+	digest(const digest<false, true, true>& other) noexcept
+	{
+		digest_data<false, true>::operator=(other);
+	}
+	digest(const digest<true, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	digest(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, true, false>(str) {}
+	explicit digest(const std::string& str) : digest(str.c_str()) {}
+	const digest& operator=(const digest& other) noexcept
+	{
+		digest_base<false, true, false>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<false, true, true>& other) noexcept
+	{
+		digest_data<false, true>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+};
+
+// Digest (alphabet not restricted; long; normalized)
+template <>
+class digest<false, false, true>
+	: public digest_base<false, false, true>
+{
+public:
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<false, false, true>(other) {}
+	digest(const digest<false, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+	}
+	digest(const digest<true, false, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	digest(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
+	}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, false, true>(str) {}
+	explicit digest(const std::string& str) : digest(str.c_str()) {}
+	const digest& operator=(const digest& other) noexcept
+	{
+		digest_base<false, false, true>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<false, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, false, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
+		return *this;
+	}
+};
+
+// Digest (alphabet not restricted; long; unnormalized)
+template <>
+class digest<false, false, false>
+	: public digest_base<false, false, false>
+{
+public:
+	digest(void) noexcept = default; // initialize to undefined state
+	digest(const digest& other) noexcept : digest_base<false, false, false>(other) {}
+	digest(const digest<false, false, true>& other) noexcept
+	{
+		digest_data<false, false>::operator=(other);
+	}
+	digest(const digest<false, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+	}
+	digest(const digest<false, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+	}
+	digest(const digest<true, false, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	digest(const digest<true, false, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+	}
+	digest(const digest<true, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
+	}
+	digest(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
+	}
+	explicit digest(const char* str) noexcept(false) : digest_base<false, false, false>(str) {}
+	explicit digest(const std::string& str) : digest(str.c_str()) {}
+	const digest& operator=(const digest& other) noexcept
+	{
+		digest_base<false, false, false>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<false, false, true>& other) noexcept
+	{
+		digest_data<false, false>::operator=(other);
+		return *this;
+	}
+	const digest& operator=(const digest<false, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<false, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, false, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, false, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_non_ra(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, false>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
+		return *this;
+	}
+	const digest& operator=(const digest<true, true, true>& other) noexcept
+	{
+		internal::digest_copy::copy_to_long_non_ra(*this, other);
 		return *this;
 	}
 };
 
 // Typedefs for digest specializations
-typedef digest< true, true>   digest_t;
-typedef digest< true, false>  digest_unorm_t;
-typedef digest<false, true>   digest_long_t;
-typedef digest<false, false>  digest_long_unorm_t;
+typedef digest<false,  true, true>   digest_t;
+typedef digest<false,  true, false>  digest_unorm_t;
+typedef digest<false, false, true>   digest_long_t;
+typedef digest<false, false, false>  digest_long_unorm_t;
+typedef digest< true,  true, true>   digest_ra_t;
+typedef digest< true,  true, false>  digest_ra_unorm_t;
+typedef digest< true, false, true>   digest_ra_long_t;
+typedef digest< true, false, false>  digest_ra_long_unorm_t;
 
 
 
@@ -194,23 +378,27 @@ namespace internal
 	{
 		static constexpr const bool is_valid = false;
 	};
-	template <bool IsShort, bool IsNormalized>
-	struct digest_traits<digest_base<IsShort, IsNormalized>>
+	template <bool IsAlphabetRestricted, bool IsShort, bool IsNormalized>
+	struct digest_traits<digest_base<IsAlphabetRestricted, IsShort, IsNormalized>>
 	{
 		static constexpr const bool is_valid = true;
-		typedef digest_base<IsShort,  true> norm_type;
-		typedef digest_base<IsShort, false> unorm_type;
-		typedef digest_base< true, IsNormalized> short_type;
-		typedef digest_base<false, IsNormalized> long_type;
+		typedef digest_base<IsAlphabetRestricted, IsShort,  true> norm_type;
+		typedef digest_base<IsAlphabetRestricted, IsShort, false> unorm_type;
+		typedef digest_base<IsAlphabetRestricted,  true, IsNormalized> short_type;
+		typedef digest_base<IsAlphabetRestricted, false, IsNormalized> long_type;
+		typedef digest_base< true, IsShort, IsNormalized> ra_type;
+		typedef digest_base<false, IsShort, IsNormalized> non_ra_type;
 	};
-	template <bool IsShort, bool IsNormalized>
-	struct digest_traits<digest<IsShort, IsNormalized>>
+	template <bool IsAlphabetRestricted, bool IsShort, bool IsNormalized>
+	struct digest_traits<digest<IsAlphabetRestricted, IsShort, IsNormalized>>
 	{
 		static constexpr const bool is_valid = true;
-		typedef digest<IsShort,  true> norm_type;
-		typedef digest<IsShort, false> unorm_type;
-		typedef digest< true, IsNormalized> short_type;
-		typedef digest<false, IsNormalized> long_type;
+		typedef digest<IsAlphabetRestricted, IsShort,  true> norm_type;
+		typedef digest<IsAlphabetRestricted, IsShort, false> unorm_type;
+		typedef digest<IsAlphabetRestricted,  true, IsNormalized> short_type;
+		typedef digest<IsAlphabetRestricted, false, IsNormalized> long_type;
+		typedef digest< true, IsShort, IsNormalized> ra_type;
+		typedef digest<false, IsShort, IsNormalized> non_ra_type;
 	};
 	template <typename T>
 	struct digest_alt_type_selector
@@ -219,16 +407,20 @@ namespace internal
 		typedef digest_traits<typename std::remove_cv<T>::type> traits_type;
 		static_assert(traits_type::is_valid, "You must give correct type to retrieve alternative types.");
 	public:
-		typedef typename type_mod::cv_match<T, typename traits_type::norm_type>::type   norm_type;
-		typedef typename type_mod::cv_match<T, typename traits_type::unorm_type>::type  unorm_type;
-		typedef typename type_mod::cv_match<T, typename traits_type::short_type>::type  short_type;
-		typedef typename type_mod::cv_match<T, typename traits_type::long_type>::type   long_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::norm_type>::type    norm_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::unorm_type>::type   unorm_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::short_type>::type   short_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::long_type>::type    long_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::ra_type>::type      ra_type;
+		typedef typename type_mod::cv_match<T, typename traits_type::non_ra_type>::type  non_ra_type;
 	};
 }
-template <typename T> using digest_to_unorm = typename internal::digest_alt_type_selector<T>::unorm_type;
-template <typename T> using digest_to_norm  = typename internal::digest_alt_type_selector<T>::norm_type;
-template <typename T> using digest_to_short = typename internal::digest_alt_type_selector<T>::short_type;
-template <typename T> using digest_to_long  = typename internal::digest_alt_type_selector<T>::long_type;
+template <typename T> using digest_to_unorm  = typename internal::digest_alt_type_selector<T>::unorm_type;
+template <typename T> using digest_to_norm   = typename internal::digest_alt_type_selector<T>::norm_type;
+template <typename T> using digest_to_short  = typename internal::digest_alt_type_selector<T>::short_type;
+template <typename T> using digest_to_long   = typename internal::digest_alt_type_selector<T>::long_type;
+template <typename T> using digest_to_ra     = typename internal::digest_alt_type_selector<T>::ra_type;
+template <typename T> using digest_to_non_ra = typename internal::digest_alt_type_selector<T>::non_ra_type;
 
 
 /*
@@ -239,9 +431,9 @@ template <typename T> using digest_to_long  = typename internal::digest_alt_type
 
 	Digest types are:
 
-	*	digest_data<IsShort>
-	*	digest<IsShort, true>
-	*	digest<IsShort, false>
+	*	digest_data<IsAlphabetRestricted, IsShort>
+	*	digest<IsAlphabetRestricted, IsShort, true>
+	*	digest<IsAlphabetRestricted, IsShort, false>
 
 	We also expect that these types are nearly equivalent.
 */
@@ -251,24 +443,28 @@ template <typename T> using digest_to_long  = typename internal::digest_alt_type
 #ifdef FFUZZYPP_LOCAL_CHK1
 #error do not define FFUZZYPP_LOCAL_CHK1
 #endif
-#define FFUZZYPP_LOCAL_CHK1(s, t) \
-	static_assert(std::is_trivially_default_constructible<digest<s, t>>::value, \
-		"digest<" #s ", " #t "> must be a trivially default constructible type."); \
-	static_assert(std::is_standard_layout<digest<s, t>>::value, \
-		"digest<" #s ", " #t "> must be a standard-layout type."); \
-	static_assert(std::is_base_of<digest_data<s>, digest<s, t>>::value, \
-		"digest_data<" #s ">, digest<" #s ", true> and digest<" #s ", false> must be nearly equivalent."); \
-	static_assert(sizeof(digest_data<s>) == sizeof(digest<s, t>), \
-		"digest_data<" #s ">, digest<" #s ", true> and digest<" #s ", false> must be nearly equivalent.")
-#define FFUZZYPP_LOCAL_CHK(s) \
-	static_assert(std::is_trivially_default_constructible<digest_data<s>>::value, \
-		"digest_data<" #s "> must be a trivially default constructible type."); \
-	static_assert(std::is_standard_layout<digest_data<s>>::value, \
-		"digest_data<" #s "> must be a standard-layout type."); \
-	FFUZZYPP_LOCAL_CHK1(s, true); \
-	FFUZZYPP_LOCAL_CHK1(s, false)
-FFUZZYPP_LOCAL_CHK(true);
-FFUZZYPP_LOCAL_CHK(false);
+#define FFUZZYPP_LOCAL_CHK1(IsAlphabetRestricted, IsShort, IsNormalized) \
+	static_assert(std::is_trivially_default_constructible<digest<IsAlphabetRestricted, IsShort, IsNormalized>>::value, \
+		"digest<" #IsAlphabetRestricted ", " #IsShort ", " #IsNormalized "> must be a trivially default constructible type."); \
+	static_assert(std::is_standard_layout<digest<IsAlphabetRestricted, IsShort, IsNormalized>>::value, \
+		"digest<" #IsAlphabetRestricted ", " #IsShort ", " #IsNormalized "> must be a standard-layout type."); \
+	static_assert(std::is_base_of<digest_data<IsAlphabetRestricted, IsShort>, digest<IsAlphabetRestricted, IsShort, IsNormalized>>::value, \
+		"digest_data<" #IsAlphabetRestricted ", " #IsShort ">, digest<" #IsAlphabetRestricted ", " #IsShort ", true> and " \
+		"digest<" #IsAlphabetRestricted ", " #IsShort ", false> must be nearly equivalent."); \
+	static_assert(sizeof(digest_data<IsAlphabetRestricted, IsShort>) == sizeof(digest<IsAlphabetRestricted, IsShort, IsNormalized>), \
+		"digest_data<" #IsAlphabetRestricted ", " #IsShort ">, digest<" #IsAlphabetRestricted ", " #IsShort ", true> and " \
+		"digest<" #IsAlphabetRestricted ", " #IsShort ", false> must be nearly equivalent.")
+#define FFUZZYPP_LOCAL_CHK(IsAlphabetRestricted, IsShort) \
+	static_assert(std::is_trivially_default_constructible<digest_data<IsAlphabetRestricted, IsShort>>::value, \
+		"digest_data<" #IsAlphabetRestricted ", " #IsShort "> must be a trivially default constructible type."); \
+	static_assert(std::is_standard_layout<digest_data<IsAlphabetRestricted, IsShort>>::value, \
+		"digest_data<" #IsAlphabetRestricted ", " #IsShort "> must be a standard-layout type."); \
+	FFUZZYPP_LOCAL_CHK1(IsAlphabetRestricted, IsShort, true); \
+	FFUZZYPP_LOCAL_CHK1(IsAlphabetRestricted, IsShort, false)
+FFUZZYPP_LOCAL_CHK(true, true);
+FFUZZYPP_LOCAL_CHK(true, false);
+FFUZZYPP_LOCAL_CHK(false, true);
+FFUZZYPP_LOCAL_CHK(false, false);
 #undef FFUZZYPP_LOCAL_CHK
 #undef FFUZZYPP_LOCAL_CHK1
 
@@ -278,21 +474,21 @@ FFUZZYPP_LOCAL_CHK(false);
 // Specialization of standard hash and swap
 namespace std
 {
-	template <bool IsShort, bool IsNormalized>
-	struct hash<ffuzzy::digest<IsShort, IsNormalized>>
+	template <bool IsAlphabetRestricted, bool IsShort, bool IsNormalized>
+	struct hash<ffuzzy::digest<IsAlphabetRestricted, IsShort, IsNormalized>>
 	{
-		size_t operator()(const ffuzzy::digest<IsShort, IsNormalized>& value) const
+		size_t operator()(const ffuzzy::digest<IsAlphabetRestricted, IsShort, IsNormalized>& value) const
 		{
 			return value.hash();
 		}
 	};
-	template <bool IsShort, bool IsNormalized>
+	template <bool IsAlphabetRestricted, bool IsShort, bool IsNormalized>
 	inline void swap(
-		ffuzzy::digest<IsShort, IsNormalized>& a,
-		ffuzzy::digest<IsShort, IsNormalized>& b
+		ffuzzy::digest<IsAlphabetRestricted, IsShort, IsNormalized>& a,
+		ffuzzy::digest<IsAlphabetRestricted, IsShort, IsNormalized>& b
 	) noexcept
 	{
-		ffuzzy::digest<IsShort, IsNormalized>::swap(a, b);
+		ffuzzy::digest<IsAlphabetRestricted, IsShort, IsNormalized>::swap(a, b);
 	}
 }
 
