@@ -40,8 +40,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <functional>
 #include <limits>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include <errno.h>
@@ -340,6 +342,30 @@ public:
 			return false;
 		}
 	};
+
+	// Hash (for sets and dictionaries)
+public:
+	size_t hash(void) const noexcept
+	{
+		typedef typename std::conditional<
+			(std::numeric_limits<size_t>::max() >= 0xfffffffful),
+			size_t, uint_least32_t
+		>::type hash_t;
+		static constexpr const hash_t fnv_init  = 2166136261ul;
+		static constexpr const hash_t fnv_prime = 16777619ul;
+		hash_t h = fnv_init;
+		h ^= hash_t(blksize);      h *= fnv_prime;
+		h ^= hash_t(blkhash1_len); h *= fnv_prime;
+		h ^= hash_t(blkhash2_len); h *= fnv_prime;
+		for (blockhash_len_t i = 0, l = blkhash1_len + blkhash2_len; i < l; i++)
+		{
+			h ^= hash_t(static_cast<unsigned char>(digest[i]));
+			h *= fnv_prime;
+		}
+		if (std::numeric_limits<size_t>::max() < 0xfffffffful)
+			h ^= (h >> 16);
+		return size_t(h);
+	}
 
 	// Normalization
 public:

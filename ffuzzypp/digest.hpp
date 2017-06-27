@@ -36,6 +36,7 @@
 #define FFUZZYPP_DIGEST_HPP
 
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <type_traits>
 
@@ -462,9 +463,17 @@ FFUZZYPP_LOCAL_CHK(false);
 }
 
 
-// Specialization for standard `swap'
+// Specialization of standard hash and swap
 namespace std
 {
+	template <bool IsShort, bool IsNormalized>
+	struct hash<ffuzzy::digest<IsShort, IsNormalized>>
+	{
+		size_t operator()(const ffuzzy::digest<IsShort, IsNormalized>& value) const
+		{
+			return value.hash();
+		}
+	};
 	template <bool IsShort, bool IsNormalized>
 	inline void swap(
 		ffuzzy::digest<IsShort, IsNormalized>& a,
