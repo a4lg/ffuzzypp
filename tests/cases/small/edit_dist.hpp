@@ -28,130 +28,148 @@
 #include <string>
 
 
-class EditDistanceFastTests : public ::testing::Test
+class EditDistanceTestParam
 {
+private:
+	EditDistanceTestParam(void) = delete;
+	EditDistanceTestParam(const EditDistanceTestParam&) = delete;
 public:
-	static const size_t max_size = 32;
-	typedef strings::edit_dist_fast<unsigned, max_size> test_type;
+	static const size_t MaxSize = 32;
 };
 
-TEST_F(EditDistanceFastTests, BothNull)
+
+template <typename T>
+class EditDistanceTests : public ::testing::Test {};
+
+typedef ::testing::Types<
+	strings::edit_dist_fast<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_dp<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_bitparallel_wrapper<unsigned, unsigned long, '0', '9', EditDistanceTestParam::MaxSize>
+> EditDistanceTypes;
+TYPED_TEST_CASE(EditDistanceTests, EditDistanceTypes);
+
+TYPED_TEST(EditDistanceTests, BothNull)
 {
-	EXPECT_EQ(0, test_type::cost(nullptr, 0, nullptr, 0));
+	EXPECT_EQ(0, TypeParam::cost(nullptr, 0, nullptr, 0));
 }
 
-TEST_F(EditDistanceFastTests, AdditionFromNull)
+TYPED_TEST(EditDistanceTests, AdditionFromNull)
 {
-	EXPECT_EQ(1, test_type::cost(nullptr, 0, "A", 1));
-	for (unsigned i = 2; i <= max_size; i++)
+	EXPECT_EQ(1, TypeParam::cost(nullptr, 0, "0", 1));
+	for (unsigned i = 2; i <= TypeParam::max_size; i++)
 	{
-		string str(i, 'A');
-		EXPECT_EQ(i, test_type::cost(nullptr, 0, str.data(), str.size()))
+		string str(i, '0');
+		EXPECT_EQ(i, TypeParam::cost(nullptr, 0, str.data(), str.size()))
 			<< "edit_dist addition (from null) test failed on length " << i << ".";
 	}
 }
 
-TEST_F(EditDistanceFastTests, RemovalToNull)
+TYPED_TEST(EditDistanceTests, RemovalToNull)
 {
-	EXPECT_EQ(1, test_type::cost("A", 1, nullptr, 0));
-	for (unsigned i = 2; i <= max_size; i++)
+	EXPECT_EQ(1, TypeParam::cost("0", 1, nullptr, 0));
+	for (unsigned i = 2; i <= TypeParam::max_size; i++)
 	{
-		string str(i, 'A');
-		EXPECT_EQ(i, test_type::cost(str.data(), str.size(), nullptr, 0))
+		string str(i, '0');
+		EXPECT_EQ(i, TypeParam::cost(str.data(), str.size(), nullptr, 0))
 			<< "edit_dist removal (to null) test failed on length " << i << ".";
 	}
 }
 
 
 template <typename T>
-class EditDistanceFastNonemptyTests : public ::testing::Test {};
+class EditDistanceNonemptyTestsSimple : public ::testing::Test {};
 
 typedef ::testing::Types<
-	strings::edit_dist_fast<unsigned, EditDistanceFastTests::max_size>,
-	strings::edit_dist_nonempty_fast<unsigned, EditDistanceFastTests::max_size>
-> EditDistanceFastNonemptyTypes;
-TYPED_TEST_CASE(EditDistanceFastNonemptyTests, EditDistanceFastNonemptyTypes);
+	strings::edit_dist_fast<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_nonempty_fast<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_dp<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_nonempty_dp<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_bitparallel_wrapper<unsigned, unsigned long, '0', '9', EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_nonempty_bitparallel_wrapper<unsigned, unsigned long, '0', '9', EditDistanceTestParam::MaxSize>
+> EditDistanceNonemptyTypesSimple;
+TYPED_TEST_CASE(EditDistanceNonemptyTestsSimple, EditDistanceNonemptyTypesSimple);
 
-TYPED_TEST(EditDistanceFastNonemptyTests, Addition)
+TYPED_TEST(EditDistanceNonemptyTestsSimple, Addition)
 {
-	typedef TypeParam test_type;
-	static const size_t max_size = test_type::max_size;
-	for (unsigned l1 = 1; l1 <= max_size; l1++)
+	for (unsigned l1 = 1; l1 <= TypeParam::max_size; l1++)
 	{
-		string str1(l1, 'A');
-		for (unsigned l2 = l1; l2 <= max_size; l2++)
+		string str1(l1, '0');
+		for (unsigned l2 = l1; l2 <= TypeParam::max_size; l2++)
 		{
-			string str2(l2, 'A');
-			EXPECT_EQ(l2 - l1, test_type::cost(str1.data(), str1.size(), str2.data(), str2.size()))
+			string str2(l2, '0');
+			EXPECT_EQ(l2 - l1, TypeParam::cost(str1.data(), str1.size(), str2.data(), str2.size()))
 				<< "edit_dist addition test failed on length from " << l1 << " to " << l2 << ".";
 		}
 	}
 }
 
-TYPED_TEST(EditDistanceFastNonemptyTests, Removal)
+TYPED_TEST(EditDistanceNonemptyTestsSimple, Removal)
 {
-	typedef TypeParam test_type;
-	static const size_t max_size = test_type::max_size;
-	for (unsigned l2 = 1; l2 <= max_size; l2++)
+	for (unsigned l2 = 1; l2 <= TypeParam::max_size; l2++)
 	{
-		string str2(l2, 'A');
-		for (unsigned l1 = l2; l1 <= max_size; l1++)
+		string str2(l2, '0');
+		for (unsigned l1 = l2; l1 <= TypeParam::max_size; l1++)
 		{
-			string str1(l1, 'A');
-			EXPECT_EQ(l1 - l2, test_type::cost(str1.data(), str1.size(), str2.data(), str2.size()))
+			string str1(l1, '0');
+			EXPECT_EQ(l1 - l2, TypeParam::cost(str1.data(), str1.size(), str2.data(), str2.size()))
 				<< "edit_dist removal test failed on length from " << l1 << " to " << l2 << ".";
 		}
 	}
 }
 
-TYPED_TEST(EditDistanceFastNonemptyTests, ReplaceOnIdenticalLength)
+TYPED_TEST(EditDistanceNonemptyTestsSimple, ReplaceOnIdenticalLength)
 {
-	typedef TypeParam test_type;
-	static const size_t max_size = test_type::max_size;
-	EXPECT_EQ(2, test_type::cost("A", 1, "B", 1));
-	for (unsigned i = 2; i <= max_size; i++)
+	EXPECT_EQ(2, TypeParam::cost("0", 1, "1", 1));
+	for (unsigned i = 2; i <= TypeParam::max_size; i++)
 	{
-		string strA(i, 'A');
-		string strB(i, 'B');
-		EXPECT_EQ(i * 2, test_type::cost(strA.data(), strA.size(), strB.data(), strB.size()))
+		string strA(i, '0');
+		string strB(i, '1');
+		EXPECT_EQ(i * 2, TypeParam::cost(strA.data(), strA.size(), strB.data(), strB.size()))
 			<< "edit_dist replace test failed on length " << i << ".";
 	}
 }
 
-TYPED_TEST(EditDistanceFastNonemptyTests, IdenticalStrings)
+TYPED_TEST(EditDistanceNonemptyTestsSimple, IdenticalStrings)
 {
-	typedef TypeParam test_type;
-	static const size_t max_size = test_type::max_size;
-	for (unsigned i = 1; i <= max_size; i++)
+	for (unsigned i = 1; i <= TypeParam::max_size; i++)
 	{
-		string strA(i, 'A');
-		EXPECT_EQ(0, test_type::cost(strA.data(), strA.size(), strA.data(), strA.size()))
+		string strA(i, '0');
+		EXPECT_EQ(0, TypeParam::cost(strA.data(), strA.size(), strA.data(), strA.size()))
 			<< "edit_dist identical strings test failed on length " << i << ".";
 	}
 }
 
-TYPED_TEST(EditDistanceFastNonemptyTests, CompletelyDifferentStrings)
+TYPED_TEST(EditDistanceNonemptyTestsSimple, CompletelyDifferentStrings)
 {
-	typedef TypeParam test_type;
-	static const size_t max_size = test_type::max_size;
-	for (unsigned i = 1; i <= max_size; i++)
+	for (unsigned i = 1; i <= TypeParam::max_size; i++)
 	{
-		string strA(i, 'A');
-		for (unsigned j = 1; j <= max_size; j++)
+		string strA(i, '0');
+		for (unsigned j = 1; j <= TypeParam::max_size; j++)
 		{
-			string strB(j, 'B');
-			EXPECT_EQ(i + j, test_type::cost(strA.data(), strA.size(), strB.data(), strB.size()))
+			string strB(j, '1');
+			EXPECT_EQ(i + j, TypeParam::cost(strA.data(), strA.size(), strB.data(), strB.size()))
 				<< "edit_dist completely different strings test failed on length from "
 				<< i << " to " << j << ".";
 		}
 	}
 }
 
-TYPED_TEST(EditDistanceFastNonemptyTests, OnRealExamples)
+
+template <typename T>
+class EditDistanceNonemptyTestsComplex : public ::testing::Test {};
+
+typedef ::testing::Types<
+	strings::edit_dist_fast<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_nonempty_fast<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_dp<unsigned, EditDistanceTestParam::MaxSize>,
+	strings::edit_dist_nonempty_dp<unsigned, EditDistanceTestParam::MaxSize>
+> EditDistanceNonemptyTypesComplex;
+TYPED_TEST_CASE(EditDistanceNonemptyTestsComplex, EditDistanceNonemptyTypesComplex);
+
+TYPED_TEST(EditDistanceNonemptyTestsComplex, OnRealExamples)
 {
-	typedef TypeParam test_type;
-	EXPECT_EQ(5, test_type::cost("kitten", 6, "sitting", 7));
-	EXPECT_EQ(7, test_type::cost("A character sequence", 20, "Other character sequence!", 25));
+	EXPECT_EQ(5, TypeParam::cost("kitten", 6, "sitting", 7));
+	EXPECT_EQ(7, TypeParam::cost("A character sequence", 20, "Other character sequence!", 25));
 }
 
 #endif
