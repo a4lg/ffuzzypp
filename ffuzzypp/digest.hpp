@@ -96,6 +96,8 @@ public:
 	{
 		return digest_data<IsShort>::is_valid() && this->template is_normalized();
 	}
+
+	// Comparison
 public:
 	static digest_comparison_score_t compare(
 		const digest_base& a,
@@ -103,6 +105,12 @@ public:
 	) noexcept
 	{
 		return digest_comparison<IsShort>::compare(a, b);
+	}
+	static digest_comparison_score_t compare_identical(
+		const digest_base& value
+	) noexcept
+	{
+		return digest_comparison<IsShort>::compare_identical(value);
 	}
 	static digest_comparison_score_t compare_near(
 		const digest_base& a,
@@ -130,6 +138,10 @@ public:
 	{
 		return compare(*this, other);
 	}
+	digest_comparison_score_t compare_identical(void) const noexcept
+	{
+		return compare_identical(*this);
+	}
 	digest_comparison_score_t compare_near(const digest_base& other) const noexcept
 	{
 		return compare_near(*this, other);
@@ -141,6 +153,43 @@ public:
 	digest_comparison_score_t compare_near_lt(const digest_base& other) const noexcept
 	{
 		return compare_near_lt(*this, other);
+	}
+
+	// Comparison (on different digests)
+public:
+	static digest_comparison_score_t compare_diff(
+		const digest_base& a,
+		const digest_base& b
+	) noexcept
+	{
+		return digest_comparison<IsShort>::compare_diff(a, b);
+	}
+	static digest_comparison_score_t compare_near_diff(
+		const digest_base& a,
+		const digest_base& b
+	) noexcept
+	{
+		return digest_comparison<IsShort>::compare_near_diff(a, b);
+	}
+	static digest_comparison_score_t compare_near_eq_diff(
+		const digest_base& a,
+		const digest_base& b
+	) noexcept
+	{
+		return digest_comparison<IsShort>::compare_near_eq_diff(a, b);
+	}
+public:
+	digest_comparison_score_t compare_diff(const digest_base& other) const noexcept
+	{
+		return compare_diff(*this, other);
+	}
+	digest_comparison_score_t compare_near_diff(const digest_base& other) const noexcept
+	{
+		return compare_near_diff(*this, other);
+	}
+	digest_comparison_score_t compare_near_eq_diff(const digest_base& other) const noexcept
+	{
+		return compare_near_eq_diff(*this, other);
 	}
 };
 

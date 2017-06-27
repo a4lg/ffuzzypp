@@ -634,9 +634,9 @@ public:
 		#endif
 	}
 
-	// Comparison (on possibly different digests)
+	// Comparison (on different digests)
 public:
-	static digest_comparison_score_t compare_near(
+	static digest_comparison_score_t compare_near_diff(
 		const digest_data<IsShort>& a,
 		const digest_data<IsShort>& b
 	) noexcept
@@ -645,9 +645,8 @@ public:
 		assert(a.is_valid() && a.is_normalized());
 		assert(b.is_valid() && b.is_normalized());
 		assert(digest_blocksize::is_near(a.blksize, b.blksize));
+		assert(a != b);
 		#endif
-		if (a == b)
-			return compare_identical(a);
 		if (digest_blocksize::is_safe_to_double(a.blksize))
 		{
 			if (digest_blocksize::is_near_eq(a.blksize, b.blksize))
@@ -702,19 +701,19 @@ public:
 				return 0;
 		}
 	}
-	static digest_comparison_score_t compare(
+	static digest_comparison_score_t compare_diff(
 		const digest_data<IsShort>& a,
 		const digest_data<IsShort>& b
 	) noexcept
 	{
 		if (!digest_blocksize::is_near(a.blksize, b.blksize))
 			return 0;
-		return compare_near(a, b);
+		return compare_near_diff(a, b);
 	}
 
-	// Comparison (on possibly different digests; specialized versions)
+	// Specialized comparison (on different digests)
 public:
-	static digest_comparison_score_t compare_near_eq(
+	static digest_comparison_score_t compare_near_eq_diff(
 		const digest_data<IsShort>& a,
 		const digest_data<IsShort>& b
 	) noexcept
@@ -723,9 +722,8 @@ public:
 		assert(a.is_valid() && a.is_normalized());
 		assert(b.is_valid() && b.is_normalized());
 		assert(digest_blocksize::is_near_eq(a.blksize, b.blksize));
+		assert(a != b);
 		#endif
-		if (digest_data<IsShort>::is_eq_except_blocksize(a, b))
-			return compare_identical(a);
 		if (digest_blocksize::is_safe_to_double(a.blksize))
 			return std::max(
 				blockhash_comparison::score(
@@ -773,6 +771,39 @@ public:
 			a.digest+a.blkhash1_len, a.blkhash2_len,
 			b.digest, b.blkhash1_len,
 			b.blksize);
+	}
+
+	// Comparison (possibly equivalent)
+public:
+	static digest_comparison_score_t compare_near(
+		const digest_data<IsShort>& a,
+		const digest_data<IsShort>& b
+	) noexcept
+	{
+		if (a == b)
+			return compare_identical(a);
+		return compare_near_diff(a, b);
+	}
+	static digest_comparison_score_t compare(
+		const digest_data<IsShort>& a,
+		const digest_data<IsShort>& b
+	) noexcept
+	{
+		if (!digest_blocksize::is_near(a.blksize, b.blksize))
+			return 0;
+		return compare_near(a, b);
+	}
+
+	// Specialized comparison (possibly equivalent)
+public:
+	static digest_comparison_score_t compare_near_eq(
+		const digest_data<IsShort>& a,
+		const digest_data<IsShort>& b
+	) noexcept
+	{
+		if (digest_data<IsShort>::is_eq_except_blocksize(a, b))
+			return compare_identical(a);
+		return compare_near_eq_diff(a, b);
 	}
 
 	// Comparison (for unnormalized form of digests)
