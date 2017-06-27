@@ -50,6 +50,7 @@ EXTRA_DIST = \
 	cases/compatibility/small/digest_comparison_identical.hpp \
 	cases/compatibility/small/digest_comparison_identical_2_9_1.hpp \
 	cases/compatibility/small/digest_comparison_identical_2_9_2.hpp \
+	cases/compatibility/small/digest_data_naturality.hpp \
 	cases/compatibility/small/digest_generator_forms.hpp \
 	cases/compatibility/small/digest_generator_initial_guess.hpp \
 	cases/compatibility/small/digest_generator_nil.hpp \

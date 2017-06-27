@@ -43,6 +43,7 @@ using namespace std;
 #include "cases/compatibility/small/blockhash_comparison_max_matching.hpp"
 #include "cases/compatibility/small/blockhash_comparison_min_matching.hpp"
 #include "cases/compatibility/small/digest_comparison_identical.hpp"
+#include "cases/compatibility/small/digest_data_naturality.hpp"
 #include "cases/compatibility/small/digest_generator_initial_guess.hpp"
 #include "cases/compatibility/small/digest_generator_nil.hpp"
 #include "cases/compatibility/small/digest_generator_rolling_hash_overflow.hpp"

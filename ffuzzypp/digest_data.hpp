@@ -193,9 +193,9 @@ public:
 	{
 		if (!is_valid())
 			return false;
-		if (blkhash1_len > blkhash2_len)
+		if (blkhash1_len < blkhash2_len)
 			return false;
-		if (digest_blocksize::is_natural(blksize))
+		if (!digest_blocksize::is_natural(blksize))
 			return false;
 		if (!digest_blocksize::is_safe_to_double(blksize) && blkhash2_len >= 2)
 			return false;
