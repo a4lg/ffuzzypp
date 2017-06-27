@@ -1,6 +1,6 @@
 /*
 
-	Static numeric digits library
+	ffuzzy++ Helper Libraries
 
 	numeric_digits.hpp
 	Construction of numeric digits

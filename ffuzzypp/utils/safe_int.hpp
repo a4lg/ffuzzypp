@@ -1,6 +1,6 @@
 /*
 
-	Safe integer handling library
+	ffuzzy++ Helper Libraries
 
 	safe_int.hpp
 	Safe integer handling utilities

@@ -1,6 +1,6 @@
 /*
 
-	C++11 type modifier library
+	ffuzzy++ Helper Libraries
 
 	type_modifier.hpp
 	C++11 type modifier utilities

@@ -1,6 +1,6 @@
 /*
 
-	Value range library
+	ffuzzy++ Helper Libraries
 
 	ranges.hpp
 	Value range library

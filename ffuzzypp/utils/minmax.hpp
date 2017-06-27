@@ -1,6 +1,6 @@
 /*
 
-	C++14-compatible minimum / maximum library
+	ffuzzy++ Helper Libraries
 
 	minmax.hpp
 	C++14-compatible minimum / maximum library

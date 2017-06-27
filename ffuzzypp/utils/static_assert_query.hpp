@@ -1,6 +1,6 @@
 /*
 
-	Queries for static assertions
+	ffuzzy++ Helper Libraries
 
 	static_assert_query.hpp
 	Basic queries for static assertions
