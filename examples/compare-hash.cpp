@@ -33,9 +33,6 @@
 // the following line will activate assertions.
 //#define FFUZZYPP_DEBUG
 
-// if you define this, ssdeep compatibility with version 2.9 is enabled.
-#define FFUZZYPP_COMPATIBILITY_SSDEEP_2_9
-
 #include "ffuzzy.hpp"
 using namespace ffuzzy;
 
@@ -117,9 +114,16 @@ int main(int argc, char** argv)
 	}
 	printf("NORM2 : %s\n", digestbuf);
 
-	// Compare them
-	// ("unnormalized" form has compare function but slow because of additional normalization)
-	digest_comparison_score_t score = decltype(h1.d)::compare(h1.d, h2.d);
+	/*
+		Compare them
+		"Unnormalized" form has compare function but slow because of additional normalization)
+
+		Note:
+		Use `compare` or `compare<comparison_version::latest>` for latest
+		version and `compare<comparison_version::v2_9>` for version 2.9 emulation.
+	*/
+	digest_comparison_score_t score =
+		decltype(h1.d)::compare<comparison_version::v2_9>(h1.d, h2.d);
 	printf("SCORE: %u\n", unsigned(score)); // safe to cast to unsigned (value is in [0,100])
 
 	return 0;

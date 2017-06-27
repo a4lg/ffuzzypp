@@ -29,9 +29,8 @@ noinst_PROGRAMS = test-precond test-small
 test_precond_SOURCES  = test_precond.cpp
 test_small_SOURCES = test_small.cpp
 if ENABLE_COMPATIBILITY_TESTS
-noinst_PROGRAMS += test-compatibility-small test-compatibility-small-2.9 test-compatibility-large
+noinst_PROGRAMS += test-compatibility-small test-compatibility-large
 test_compatibility_small_SOURCES = test_compatibility_small.cpp
-test_compatibility_small_2_9_SOURCES = test_compatibility_small_2_9.cpp
 test_compatibility_large_SOURCES = test_compatibility_large.cpp
 endif
 endif

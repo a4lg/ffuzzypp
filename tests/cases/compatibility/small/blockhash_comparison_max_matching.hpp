@@ -87,19 +87,19 @@ TEST_F(BlockhashComparisonMaxMatchingTests, CommutativeProperty)
 			s2len <= digest_params::max_blockhash_len; s2len++)
 		{
 			ASSERT_EQ(
-				blockhash_comparison::uncapped_max_matching_score(s1len, s2len),
-				blockhash_comparison::uncapped_max_matching_score(s2len, s1len)
+				blockhash_comparison<>::uncapped_max_matching_score(s1len, s2len),
+				blockhash_comparison<>::uncapped_max_matching_score(s2len, s1len)
 			);
 			for (unsigned bi = 0; bi < digest_blocksize::number_of_blockhashes; bi++)
 			{
 				digest_blocksize_t bs = digest_blocksize::at(bi);
 				ASSERT_EQ(
-					blockhash_comparison::capped_max_matching_score(bs, s1len, s2len),
-					blockhash_comparison::capped_max_matching_score(bs, s2len, s1len)
+					blockhash_comparison<>::capped_max_matching_score(bs, s1len, s2len),
+					blockhash_comparison<>::capped_max_matching_score(bs, s2len, s1len)
 				);
 				ASSERT_EQ(
-					blockhash_comparison::max_matching_score(bs, s1len, s2len),
-					blockhash_comparison::max_matching_score(bs, s2len, s1len)
+					blockhash_comparison<>::max_matching_score(bs, s1len, s2len),
+					blockhash_comparison<>::max_matching_score(bs, s2len, s1len)
 				);
 			}
 		}
@@ -116,34 +116,34 @@ TEST_F(BlockhashComparisonMaxMatchingTests, MaxMatchingScoreNotEq)
 		{
 			ASSERT_NE(s1len, s2len);
 			ASSERT_EQ(
-				blockhash_comparison::uncapped_max_matching_score_le(s2len, s1len),
-				blockhash_comparison::uncapped_max_matching_score(s2len, s1len)
+				blockhash_comparison<>::uncapped_max_matching_score_le(s2len, s1len),
+				blockhash_comparison<>::uncapped_max_matching_score(s2len, s1len)
 			);
 			for (blockhash_len_t index = 0; index <= s1len - s2len; index++)
 			{
 				string s2 = MaxMatchingTemplateSubstring(s1len, s2len, index);
 				ASSERT_EQ(
-					blockhash_comparison::uncapped_max_matching_score_le(s2len, s1len),
-					blockhash_comparison::uncapped_score(s1.data(), s1len, s2.data(), s2len)
+					blockhash_comparison<>::uncapped_max_matching_score_le(s2len, s1len),
+					blockhash_comparison<>::uncapped_score(s1.data(), s1len, s2.data(), s2len)
 				);
 				for (unsigned bi = 0; bi < digest_blocksize::number_of_blockhashes; bi++)
 				{
 					digest_blocksize_t bs = digest_blocksize::at(bi);
 					ASSERT_EQ(
-						blockhash_comparison::capped_max_matching_score_le(bs, s2len, s1len),
-						blockhash_comparison::capped_max_matching_score(bs, s2len, s1len)
+						blockhash_comparison<>::capped_max_matching_score_le(bs, s2len, s1len),
+						blockhash_comparison<>::capped_max_matching_score(bs, s2len, s1len)
 					);
 					ASSERT_EQ(
-						blockhash_comparison::max_matching_score_le(bs, s2len, s1len),
-						blockhash_comparison::max_matching_score(bs, s2len, s1len)
+						blockhash_comparison<>::max_matching_score_le(bs, s2len, s1len),
+						blockhash_comparison<>::max_matching_score(bs, s2len, s1len)
 					);
 					ASSERT_EQ(
-						blockhash_comparison::max_matching_score_le(bs, s2len, s1len),
-						blockhash_comparison::score(s1.data(), s1len, s2.data(), s2len, bs)
+						blockhash_comparison<>::max_matching_score_le(bs, s2len, s1len),
+						blockhash_comparison<>::score(s1.data(), s1len, s2.data(), s2len, bs)
 					);
 					ASSERT_EQ(
-						blockhash_comparison::max_matching_score_le(bs, s2len, s1len),
-						blockhash_comparison::capped_max_matching_score_le(bs, s2len, s1len)
+						blockhash_comparison<>::max_matching_score_le(bs, s2len, s1len),
+						blockhash_comparison<>::capped_max_matching_score_le(bs, s2len, s1len)
 					);
 				}
 			}
@@ -157,24 +157,24 @@ TEST_F(BlockhashComparisonMaxMatchingTests, MaxMatchingScoreEq)
 		slen <= digest_params::max_blockhash_len; slen++)
 	{
 		ASSERT_EQ(
-			blockhash_comparison::uncapped_max_matching_score_le(slen, slen),
-			blockhash_comparison::uncapped_max_matching_score(slen, slen)
+			blockhash_comparison<>::uncapped_max_matching_score_le(slen, slen),
+			blockhash_comparison<>::uncapped_max_matching_score(slen, slen)
 		);
 		string s = MaxMatchingTemplate(slen);
 		ASSERT_EQ(
-			blockhash_comparison::uncapped_max_matching_score_le(slen, slen),
-			blockhash_comparison::uncapped_score(s.data(), slen, s.data(), slen)
+			blockhash_comparison<>::uncapped_max_matching_score_le(slen, slen),
+			blockhash_comparison<>::uncapped_score(s.data(), slen, s.data(), slen)
 		);
 		for (unsigned bi = 0; bi < digest_blocksize::number_of_blockhashes; bi++)
 		{
 			digest_blocksize_t bs = digest_blocksize::at(bi);
 			ASSERT_EQ(
-				blockhash_comparison::capped_max_matching_score_le(bs, slen, slen),
-				blockhash_comparison::score(s.data(), slen, s.data(), slen, bs)
+				blockhash_comparison<>::capped_max_matching_score_le(bs, slen, slen),
+				blockhash_comparison<>::score(s.data(), slen, s.data(), slen, bs)
 			);
 			ASSERT_EQ(
-				blockhash_comparison::max_matching_score_le(bs, slen, slen),
-				blockhash_comparison::score_identical(slen, bs)
+				blockhash_comparison<>::max_matching_score_le(bs, slen, slen),
+				blockhash_comparison<>::score_identical(slen, bs)
 			);
 		}
 	}

@@ -30,9 +30,6 @@
 #ifndef FFUZZYPP_COMPATIBILITY_SSDEEP
 #define FFUZZYPP_COMPATIBILITY_SSDEEP
 #endif
-#ifdef FFUZZYPP_COMPATIBILITY_SSDEEP_2_9
-#undef FFUZZYPP_COMPATIBILITY_SSDEEP_2_9
-#endif
 #ifndef FFUZZYPP_DECLARATIONS
 #define FFUZZYPP_DECLARATIONS
 #endif
@@ -43,6 +40,8 @@ using namespace std;
 #include "cases/compatibility/small/blockhash_comparison_max_matching.hpp"
 #include "cases/compatibility/small/blockhash_comparison_min_matching.hpp"
 #include "cases/compatibility/small/digest_comparison_identical.hpp"
+#include "cases/compatibility/small/digest_comparison_identical_2_9_1.hpp"
+#include "cases/compatibility/small/digest_comparison_identical_2_9_2.hpp"
 #include "cases/compatibility/small/digest_data_naturality.hpp"
 #include "cases/compatibility/small/digest_generator_initial_guess.hpp"
 #include "cases/compatibility/small/digest_generator_nil.hpp"

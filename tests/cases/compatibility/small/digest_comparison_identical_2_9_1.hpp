@@ -5,7 +5,7 @@
 	tests/cases/compatibility/small/digest_comparison_identical_2_9_1.hpp
 	Tests for identical digest comparison (compare with version 2.9; part 1)
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 
 	Permission to use, copy, modify, and/or distribute this software for
@@ -2134,7 +2134,7 @@ TEST_F(DigestComparisonIdenticalTests_2_9, BehaviorComparisonTest)
 			{
 				string dgst = chunk1 + gbh[l1] + ":" + gbh[l2];
 				digest_long_t d(dgst);
-				ASSERT_EQ(compare_scores[bi][l2][l1], d.compare(d))
+				ASSERT_EQ(compare_scores[bi][l2][l1], d.compare<comparison_version::v2_9>(d))
 					<< "digest comparison (identical) test with ssdeep 2.9 failed with parameters "
 					<< bi << ", " << l1 << ", " << l2 << ".";
 			}

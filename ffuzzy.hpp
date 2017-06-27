@@ -5,7 +5,7 @@
 	ffuzzy.hpp
 	Fuzzy hashing implementation
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 
 	Permission to use, copy, modify, and/or distribute this software for
@@ -23,12 +23,6 @@
 */
 #ifndef FFUZZYPP_ROOT_FFUZZY_HPP
 #define FFUZZYPP_ROOT_FFUZZY_HPP
-
-#ifndef FFUZZYPP_COMPATIBILITY_SSDEEP
-#ifdef  FFUZZYPP_COMPATIBILITY_SSDEEP_2_9
-#define FFUZZYPP_COMPATIBILITY_SSDEEP
-#endif
-#endif
 
 #include "ffuzzypp/utils/likely.hpp"
 #include "ffuzzypp/utils/minmax.hpp"
@@ -57,6 +51,9 @@
 #include "ffuzzypp/digest_filesize.hpp"
 #include "ffuzzypp/digest_generator.hpp"
 
+#ifdef FFUZZYPP_COMPATIBILITY_SSDEEP_2_9
+#error Configuration by FFUZZYPP_COMPATIBILITY_SSDEEP_2_9 is now removed. Read README for alternative method.
+#endif
 #ifdef FFUZZYPP_COMPATIBILITY_SSDEEP
 static_assert(ffuzzy::digest_params::max_blockhash_len == 64,
 	"Given parameter (digest_params::max_blockhash_len) is not compatible with ssdeep.");

@@ -99,8 +99,6 @@ parameters) are enabled and you can disable these tests by adding
 	Relatively small tests (that can be done in a few minutes).
 *	tests/test-compatibility-small  
 	Compatibility tests (depends on ssdeep parameters)
-*	tests/test-compatibility-small-2.9  
-	Compatibility tests to test ssdeep 2.9 emulation
 *	tests/test-compatibility-large  
 	Large compatibility tests (depends on ssdeep parameters)
 *	tests/test-precond  
@@ -138,8 +136,8 @@ Differences between ssdeep
 
 When comparing identical digests, ssdeep 2.9 and 2.13 return different
 values. By default, ffuzzy++ emulates behavior of version 2.13.
-If you define `FFUZZYPP_COMPATIBILITY_SSDEEP_2_9`, ffuzzy++ will
-emulate behavior of version 2.9.
+If you give `comparison_version::v2_9` to `comparison`-related function
+as a template parameter, ffuzzy++ will emulate behavior of version 2.9.
 
 Result of comparison is not in a signed type but in an unsigned type
 because error handling things are moved out of comparison.

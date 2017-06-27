@@ -83,97 +83,113 @@ public:
 
 	// Comparison
 public:
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare(a, b);
+		return digest_comparison<Version>::compare(a, b);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_identical(
 		const digest_base& value
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_identical(value);
+		return digest_comparison<Version>::compare_identical(value);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_near(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_near(a, b);
+		return digest_comparison<Version>::compare_near(a, b);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_near_eq(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_near_eq(a, b);
+		return digest_comparison<Version>::compare_near_eq(a, b);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_near_lt(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_near_lt(a, b);
+		return digest_comparison<Version>::compare_near_lt(a, b);
 	}
 public:
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare(const digest_base& other) const noexcept
 	{
-		return compare(*this, other);
+		return compare<Version>(*this, other);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_identical(void) const noexcept
 	{
-		return compare_identical(*this);
+		return compare_identical<Version>(*this);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_near(const digest_base& other) const noexcept
 	{
-		return compare_near(*this, other);
+		return compare_near<Version>(*this, other);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_near_eq(const digest_base& other) const noexcept
 	{
-		return compare_near_eq(*this, other);
+		return compare_near_eq<Version>(*this, other);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_near_lt(const digest_base& other) const noexcept
 	{
-		return compare_near_lt(*this, other);
+		return compare_near_lt<Version>(*this, other);
 	}
 
 	// Comparison (on different digests)
 public:
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_diff(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_diff(a, b);
+		return digest_comparison<Version>::compare_diff(a, b);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_near_diff(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_near_diff(a, b);
+		return digest_comparison<Version>::compare_near_diff(a, b);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare_near_eq_diff(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_near_eq_diff(a, b);
+		return digest_comparison<Version>::compare_near_eq_diff(a, b);
 	}
 public:
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_diff(const digest_base& other) const noexcept
 	{
-		return compare_diff(*this, other);
+		return compare_diff<Version>(*this, other);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_near_diff(const digest_base& other) const noexcept
 	{
-		return compare_near_diff(*this, other);
+		return compare_near_diff<Version>(*this, other);
 	}
+	template <comparison_version Version = comparison_version::latest>
 	digest_comparison_score_t compare_near_eq_diff(const digest_base& other) const noexcept
 	{
-		return compare_near_eq_diff(*this, other);
+		return compare_near_eq_diff<Version>(*this, other);
 	}
 };
 
@@ -219,15 +235,17 @@ public:
 	}
 	explicit operator digest_base<IsShort, true>(void) const noexcept { return to_normalized(); }
 public:
+	template <comparison_version Version = comparison_version::latest>
 	static digest_comparison_score_t compare(
 		const digest_base& a,
 		const digest_base& b
 	) noexcept
 	{
-		return digest_comparison<IsShort>::compare_unnormalized(a, b);
+		return digest_comparison<Version>::compare_unnormalized(a, b);
 	}
 public:
-	digest_comparison_score_t compare(const digest_base& other) const noexcept { return compare(*this, other); }
+	template <comparison_version Version = comparison_version::latest>
+	digest_comparison_score_t compare(const digest_base& other) const noexcept { return compare<Version>(*this, other); }
 };
 
 }

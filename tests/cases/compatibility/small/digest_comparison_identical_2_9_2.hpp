@@ -5,7 +5,7 @@
 	tests/cases/compatibility/small/digest_comparison_identical_2_9_2.hpp
 	Tests for identical digest comparison (compare with version 2.9; part 2)
 
-	Copyright (C) 2014 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 
 	Permission to use, copy, modify, and/or distribute this software for
@@ -31,13 +31,13 @@
 
 TEST_F(DigestComparisonIdenticalTests_2_9, MinimumNormalizationComparisonTest)
 {
-	EXPECT_EQ(  0, digest_comparison_t::compare("3:AAAAAAA:", "3:AAAAAAAAAAAAAA:"));
-	EXPECT_EQ(  0, digest_comparison_t::compare("3::AAAAAAA", "3::AAAAAAAAAAAAAA"));
-	EXPECT_EQ(  7, digest_comparison_t::compare("3:AAAAAABCCCCCC:", "3:AAABCCC:"));
-	EXPECT_EQ(  7, digest_comparison_t::compare("3:AAAAAABCCCCCC:D", "3:AAABCCC:E"));
-	EXPECT_EQ( 14, digest_comparison_t::compare("3::AAAAAABCCCCCC", "3::AAABCCC"));
-	EXPECT_EQ( 14, digest_comparison_t::compare("3:D:AAAAAABCCCCCC", "3:E:AAABCCC"));
-	EXPECT_EQ( 32, digest_comparison_t::compare(
+	EXPECT_EQ(  0, digest_comparison<comparison_version::v2_9>::compare("3:AAAAAAA:", "3:AAAAAAAAAAAAAA:"));
+	EXPECT_EQ(  0, digest_comparison<comparison_version::v2_9>::compare("3::AAAAAAA", "3::AAAAAAAAAAAAAA"));
+	EXPECT_EQ(  7, digest_comparison<comparison_version::v2_9>::compare("3:AAAAAABCCCCCC:", "3:AAABCCC:"));
+	EXPECT_EQ(  7, digest_comparison<comparison_version::v2_9>::compare("3:AAAAAABCCCCCC:D", "3:AAABCCC:E"));
+	EXPECT_EQ( 14, digest_comparison<comparison_version::v2_9>::compare("3::AAAAAABCCCCCC", "3::AAABCCC"));
+	EXPECT_EQ( 14, digest_comparison<comparison_version::v2_9>::compare("3:D:AAAAAABCCCCCC", "3:E:AAABCCC"));
+	EXPECT_EQ( 32, digest_comparison<comparison_version::v2_9>::compare(
 		"3:aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffffgggggggghhhhhhhh01234567:",
 		"3:aaabbbcccdddeeefffggghhh01234567:"
 	));

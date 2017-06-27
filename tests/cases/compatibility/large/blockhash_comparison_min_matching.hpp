@@ -54,8 +54,8 @@ TEST_P(BlockhashComparisonMinMatchingTestsWithBlocksizeIndex, MinMatchingScore)
 					unsigned bi = GetParam();
 					digest_blocksize_t bs = digest_blocksize::at(bi);
 					ASSERT_EQ(
-						blockhash_comparison::min_matching_score(bs, s1len, s2len),
-						blockhash_comparison::score(s1.data(), s1len, s2.data(), s2len, bs)
+						blockhash_comparison<>::min_matching_score(bs, s1len, s2len),
+						blockhash_comparison<>::score(s1.data(), s1len, s2.data(), s2len, bs)
 					);
 				}
 			}

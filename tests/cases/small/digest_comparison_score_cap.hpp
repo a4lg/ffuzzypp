@@ -36,7 +36,7 @@ TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingTrueSpec)
 		digest_blocksize::min_blocksize;
 	for (digest_blocksize_t s = 0; s < ubound; s++)
 	{
-		EXPECT_TRUE(blockhash_comparison::is_safe_for_score_capping(s))
+		EXPECT_TRUE(blockhash_comparison<>::is_safe_for_score_capping(s))
 			<< "is_safe_for_score_capping test (to true) failed at " << s << ".";
 	}
 }
@@ -50,7 +50,7 @@ TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingFalseSpec)
 	)
 	{
 		digest_blocksize_t s(i);
-		ASSERT_FALSE(blockhash_comparison::is_safe_for_score_capping(s))
+		ASSERT_FALSE(blockhash_comparison<>::is_safe_for_score_capping(s))
 			<< "is_safe_for_score_capping test (to false) failed at " << s << ".";
 	}
 }
@@ -74,7 +74,7 @@ TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingIndeterminateSpecMin)
 	{
 		digest_blocksize_t s(i);
 		ASSERT_LE(100,
-			blockhash_comparison::score_cap(s,
+			blockhash_comparison<>::score_cap(s,
 				blockhash_comparison_params::min_match_len,
 				blockhash_comparison_params::min_match_len
 			))
@@ -92,7 +92,7 @@ TEST(DigestComparisonScoreCapTests, ScoreCapSpecSmall)
 			l <= digest_params::max_blockhash_len; l++
 		)
 		{
-			if (blockhash_comparison::is_safe_for_score_capping(s))
+			if (blockhash_comparison<>::is_safe_for_score_capping(s))
 			{
 				digest_comparison_score_t expected_cap
 					= std::min<digest_comparison_score_t>(
@@ -100,14 +100,14 @@ TEST(DigestComparisonScoreCapTests, ScoreCapSpecSmall)
 							* digest_comparison_score_t(l),
 						100);
 				digest_comparison_score_t actual_cap
-					= blockhash_comparison::score_cap(s, l, l);
+					= blockhash_comparison<>::score_cap(s, l, l);
 				ASSERT_TRUE(expected_cap == actual_cap || 100 <= actual_cap)
 					<< "score cap test failed at block size " << s
 					<< " and blockhash length " << l << ".";
 			}
 			else
 			{
-				ASSERT_EQ(100, blockhash_comparison::score_cap(s, l, l))
+				ASSERT_EQ(100, blockhash_comparison<>::score_cap(s, l, l))
 					<< "score cap test failed at block size " << s
 					<< " and blockhash length " << l << ".";
 			}

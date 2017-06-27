@@ -98,18 +98,18 @@ TEST_F(BlockhashComparisonMinMatchingTests, MinMatchingScoreSmall)
 			{
 				digest_blocksize_t bs = digest_blocksize::at(bi);
 				ASSERT_EQ(
-					blockhash_comparison::uncapped_min_matching_score(s1len, s2len),
-					blockhash_comparison::uncapped_score(s1.data(), s1len, s2.data(), s2len)
+					blockhash_comparison<>::uncapped_min_matching_score(s1len, s2len),
+					blockhash_comparison<>::uncapped_score(s1.data(), s1len, s2.data(), s2len)
 				);
 				ASSERT_EQ(
-					blockhash_comparison::min_matching_score(bs, s1len, s2len),
-					blockhash_comparison::score(s1.data(), s1len, s2.data(), s2len, bs)
+					blockhash_comparison<>::min_matching_score(bs, s1len, s2len),
+					blockhash_comparison<>::score(s1.data(), s1len, s2.data(), s2len, bs)
 				);
 				ASSERT_EQ(
-					blockhash_comparison::min_matching_score(bs, s1len, s2len),
+					blockhash_comparison<>::min_matching_score(bs, s1len, s2len),
 					std::min(
-						blockhash_comparison::uncapped_min_matching_score(s1len, s2len),
-						blockhash_comparison::score_cap(bs, s1len, s2len)
+						blockhash_comparison<>::uncapped_min_matching_score(s1len, s2len),
+						blockhash_comparison<>::score_cap(bs, s1len, s2len)
 					)
 				);
 			}
@@ -132,8 +132,8 @@ TEST_F(BlockhashComparisonMinMatchingTests, MinMatchingScoreLargeSubset)
 				{
 					string s2 = MinMatchingTemplate2(s2len, s2idx);
 					ASSERT_EQ(
-						blockhash_comparison::uncapped_min_matching_score(s1len, s2len),
-						blockhash_comparison::uncapped_score(s1.data(), s1len, s2.data(), s2len)
+						blockhash_comparison<>::uncapped_min_matching_score(s1len, s2len),
+						blockhash_comparison<>::uncapped_score(s1.data(), s1len, s2.data(), s2len)
 					);
 				}
 			}

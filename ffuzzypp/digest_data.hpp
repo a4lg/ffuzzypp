@@ -85,8 +85,13 @@ public:
 
 
 // Friend classes for digest_data class
-namespace internal { class digest_copy; }
-template <bool> class digest_comparison;
+enum struct comparison_version;
+namespace internal
+{
+	template <comparison_version> class digest_comparison_base;
+	class digest_copy;
+}
+template <comparison_version> class digest_comparison;
 
 // Data structure for fuzzy digest (as base class)
 template <bool IsShort>
@@ -508,7 +513,8 @@ public:
 	}
 
 	// Friend classes
-	friend class digest_comparison<IsShort>;
+	template <comparison_version> friend class internal::digest_comparison_base;
+	template <comparison_version> friend class digest_comparison;
 	friend class digest_generator;
 	friend class internal::digest_copy;
 };
