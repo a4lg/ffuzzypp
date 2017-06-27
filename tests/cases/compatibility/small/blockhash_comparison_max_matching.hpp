@@ -80,10 +80,10 @@ TEST_F(BlockhashComparisonMaxMatchingTests, TemplateSanity)
 
 TEST_F(BlockhashComparisonMaxMatchingTests, CommutativeProperty)
 {
-	for (blockhash_len_t s1len = blockhash_comparison::min_match_len;
+	for (blockhash_len_t s1len = blockhash_comparison_params::min_match_len;
 		s1len <= digest_params::max_blockhash_len; s1len++)
 	{
-		for (blockhash_len_t s2len = blockhash_comparison::min_match_len;
+		for (blockhash_len_t s2len = blockhash_comparison_params::min_match_len;
 			s2len <= digest_params::max_blockhash_len; s2len++)
 		{
 			ASSERT_EQ(
@@ -108,11 +108,11 @@ TEST_F(BlockhashComparisonMaxMatchingTests, CommutativeProperty)
 
 TEST_F(BlockhashComparisonMaxMatchingTests, MaxMatchingScoreNotEq)
 {
-	for (blockhash_len_t s1len = blockhash_comparison::min_match_len;
+	for (blockhash_len_t s1len = blockhash_comparison_params::min_match_len;
 		s1len <= digest_params::max_blockhash_len; s1len++)
 	{
 		string s1 = MaxMatchingTemplate(s1len);
-		for (blockhash_len_t s2len = blockhash_comparison::min_match_len; s2len < s1len; s2len++)
+		for (blockhash_len_t s2len = blockhash_comparison_params::min_match_len; s2len < s1len; s2len++)
 		{
 			ASSERT_NE(s1len, s2len);
 			ASSERT_EQ(
@@ -153,7 +153,7 @@ TEST_F(BlockhashComparisonMaxMatchingTests, MaxMatchingScoreNotEq)
 
 TEST_F(BlockhashComparisonMaxMatchingTests, MaxMatchingScoreEq)
 {
-	for (blockhash_len_t slen = blockhash_comparison::min_match_len;
+	for (blockhash_len_t slen = blockhash_comparison_params::min_match_len;
 		slen <= digest_params::max_blockhash_len; slen++)
 	{
 		ASSERT_EQ(

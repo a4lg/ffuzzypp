@@ -62,8 +62,8 @@ static_assert(ffuzzy::digest_params::max_blockhash_len == 64,
 	"Given parameter (digest_params::max_blockhash_len) is not compatible with ssdeep.");
 static_assert(ffuzzy::digest_params::max_blockhash_sequence == 3,
 	"Given parameter (digest_params::max_blockhash_sequence) is not compatible with ssdeep.");
-static_assert(ffuzzy::blockhash_comparison::min_match_len == 7,
-	"Given parameter (blockhash_comparison::min_match_len) is not compatible with ssdeep.");
+static_assert(ffuzzy::blockhash_comparison_params::min_match_len == 7,
+	"Given parameter (blockhash_comparison_params::min_match_len) is not compatible with ssdeep.");
 static_assert(ffuzzy::rolling_hash::window_size == 7,
 	"Given parameter (rolling_hash::window_size) is not compatible with ssdeep.");
 static_assert(ffuzzy::digest_blocksize::number_of_blockhashes == 31,

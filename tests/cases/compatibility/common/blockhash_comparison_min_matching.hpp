@@ -80,7 +80,7 @@ protected:
 	{
 		return construct_from_template(
 			s1template, filler,
-			len, blockhash_comparison::min_match_len, index
+			len, blockhash_comparison_params::min_match_len, index
 		);
 	}
 	string MinMatchingTemplate2(
@@ -90,7 +90,7 @@ protected:
 	{
 		return construct_from_template(
 			s2template, filler,
-			len, blockhash_comparison::min_match_len, index
+			len, blockhash_comparison_params::min_match_len, index
 		);
 	}
 };

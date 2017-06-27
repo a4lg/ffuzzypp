@@ -31,8 +31,8 @@
 TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingTrueSpec)
 {
 	static constexpr digest_blocksize_t ubound =
-		digest_blocksize_t(99u + blockhash_comparison::min_match_len) /
-		digest_blocksize_t(blockhash_comparison::min_match_len) *
+		digest_blocksize_t(99u + blockhash_comparison_params::min_match_len) /
+		digest_blocksize_t(blockhash_comparison_params::min_match_len) *
 		digest_blocksize::min_blocksize;
 	for (digest_blocksize_t s = 0; s < ubound; s++)
 	{
@@ -60,8 +60,8 @@ TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingIndeterminateSpecMin)
 	static constexpr digest_blocksize_t ubound =
 		digest_blocksize::min_blocksize * 100;
 	static constexpr digest_blocksize_t lbound =
-		digest_blocksize_t(99u + blockhash_comparison::min_match_len) /
-		digest_blocksize_t(blockhash_comparison::min_match_len) *
+		digest_blocksize_t(99u + blockhash_comparison_params::min_match_len) /
+		digest_blocksize_t(blockhash_comparison_params::min_match_len) *
 		digest_blocksize::min_blocksize;
 	/*
 		Tests values not tested in the following two tests
@@ -75,8 +75,8 @@ TEST(DigestComparisonScoreCapTests, IsSafeForScoreCappingIndeterminateSpecMin)
 		digest_blocksize_t s(i);
 		ASSERT_LE(100,
 			blockhash_comparison::score_cap(s,
-				blockhash_comparison::min_match_len,
-				blockhash_comparison::min_match_len
+				blockhash_comparison_params::min_match_len,
+				blockhash_comparison_params::min_match_len
 			))
 			<< "score_cap test for indeterminate is_safe_for_score_capping range "
 			<< "failed at " << s << ".";
@@ -88,7 +88,7 @@ TEST(DigestComparisonScoreCapTests, ScoreCapSpecSmall)
 	for (digest_blocksize_t s = 0; s < digest_blocksize::min_blocksize * 100; s++)
 	{
 		for (
-			blockhash_len_t l = blockhash_comparison::min_match_len;
+			blockhash_len_t l = blockhash_comparison_params::min_match_len;
 			l <= digest_params::max_blockhash_len; l++
 		)
 		{

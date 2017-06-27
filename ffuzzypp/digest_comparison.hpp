@@ -58,6 +58,16 @@ typedef unsigned digest_comparison_score_t;
 	*	digest_comparison    (which takes two normalized digests)
 */
 
+class blockhash_comparison_params
+{
+private:
+	blockhash_comparison_params(void) = delete;
+	blockhash_comparison_params(const blockhash_comparison_params&) = delete;
+	// Parameters
+public:
+	static constexpr const size_t min_match_len = 7;
+};
+
 class blockhash_comparison
 {
 	static_assert(safe_int::contracts::is_unsigned_integral_type<digest_comparison_score_t>(),
@@ -65,10 +75,6 @@ class blockhash_comparison
 private:
 	blockhash_comparison(void) = delete;
 	blockhash_comparison(const blockhash_comparison&) = delete;
-
-	// Parameters
-public:
-	static constexpr const size_t min_match_len = 7;
 
 	/*
 		Common substring and edit distance types
@@ -83,7 +89,7 @@ public:
 		"max_blockhash_len * 2 must be in range of digest_comparison_score_t.");
 	typedef strings::common_substr_fast<
 		digest_params::max_blockhash_len,
-		min_match_len
+		blockhash_comparison_params::min_match_len
 	> common_substr_t;
 	typedef strings::edit_dist_norm<
 		strings::edit_dist_nonempty_fast<digest_comparison_score_t, digest_params::max_blockhash_len>
@@ -101,16 +107,16 @@ public:
 				safe_int::uvalue<digest_blocksize_t, 100>
 			>::is_valid,
 			"min_blocksize * 100 must be in range of digest_blocksize_t.");
-		static_assert(min_match_len != 0,
-			"min_match_len must not be zero (due to implementation restriction).");
+		static_assert(blockhash_comparison_params::min_match_len != 0,
+			"blockhash_comparison_params::min_match_len must not be zero (due to implementation restriction).");
 		static_assert(safe_int::safe_add<
 				safe_int::uvalue<digest_blocksize_t, 99>,
-				safe_int::uvalue<digest_blocksize_t, min_match_len>
+				safe_int::uvalue<digest_blocksize_t, blockhash_comparison_params::min_match_len>
 			>::is_valid,
-			"99 + min_match_len must be in range of digest_blocksize_t.");
+			"99 + blockhash_comparison_params::min_match_len must be in range of digest_blocksize_t.");
 		return blocksize <
-			digest_blocksize_t(99u + min_match_len) /
-			digest_blocksize_t(min_match_len) *
+			digest_blocksize_t(99u + blockhash_comparison_params::min_match_len) /
+			digest_blocksize_t(blockhash_comparison_params::min_match_len) *
 			digest_blocksize::min_blocksize;
 	}
 private:
@@ -154,8 +160,8 @@ public:
 		assert(is_safe_for_score_capping(blocksize));
 		assert(s1len <= digest_params::max_blockhash_len);
 		assert(s2len <= digest_params::max_blockhash_len);
-		assert(s1len >= min_match_len);
-		assert(s2len >= min_match_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len);
 		#endif
 		return CONST_score_cap_unsafe(blocksize, s1len, s2len);
 	}
@@ -169,8 +175,8 @@ public:
 		#ifdef FFUZZYPP_DEBUG
 		assert(s1len <= digest_params::max_blockhash_len);
 		assert(s2len <= digest_params::max_blockhash_len);
-		assert(s1len >= min_match_len);
-		assert(s2len >= min_match_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len);
 		#endif
 		return CONST_score_cap_safe(blocksize, s1len, s2len);
 	}
@@ -207,8 +213,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(edit_distance <= s1len + s2len);
 		#endif
 		return CONST_uncapped_score(edit_distance, s1len, s2len);
@@ -234,7 +240,7 @@ private:
 	) noexcept
 	{
 		return
-			s1len < min_match_len || s2len < min_match_len
+			s1len < blockhash_comparison_params::min_match_len || s2len < blockhash_comparison_params::min_match_len
 			? 0
 			: !is_safe_for_score_capping(blocksize)
 				? uncapped_score
@@ -264,8 +270,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(edit_distance <= s1len + s2len);
 		#endif
 		return CONST_score(edit_distance, blocksize, s1len, s2len);
@@ -324,7 +330,7 @@ private:
 	{
 		return CONST_uncapped_score(
 			digest_comparison_score_t(s1len + s2len)
-				- digest_comparison_score_t(2 * min_match_len),
+				- digest_comparison_score_t(2 * blockhash_comparison_params::min_match_len),
 			s1len, s2len
 		);
 	}
@@ -336,8 +342,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		return CONST_uncapped_min_matching_score(s1len, s2len);
 	}
@@ -353,11 +359,11 @@ public:
 			There are no less scores but zero for given
 			block hash lengths and the block size.
 			We assume that we have common strings in block hash
-			(s1len and s2len should be at least min_match_len).
+			(s1len and s2len should be at least blockhash_comparison_params::min_match_len).
 		*/
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		return CONST_capped_score(
 			uncapped_min_matching_score(s1len, s2len),
@@ -375,8 +381,8 @@ public:
 	}
 	static constexpr digest_comparison_score_t uncapped_min_matching_score_half(void) noexcept
 	{
-		static_assert(digest_params::max_blockhash_len / 2 >= min_match_len,
-			"max_blockhash_len / 2 must be at least min_match_len.");
+		static_assert(digest_params::max_blockhash_len / 2 >= blockhash_comparison_params::min_match_len,
+			"max_blockhash_len / 2 must be at least blockhash_comparison_params::min_match_len.");
 		return CONST_uncapped_min_matching_score(
 			digest_params::max_blockhash_len / 2,
 			digest_params::max_blockhash_len / 2
@@ -456,8 +462,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(s1len <= s2len);
 		#endif
 		return CONST_uncapped_max_matching_score_le(s1len, s2len);
@@ -469,8 +475,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		return s1len <= s2len
 			? uncapped_max_matching_score_le(s1len, s2len)
@@ -488,8 +494,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(s1len <= s2len);
 		#endif
 		return CONST_capped_score(
@@ -509,8 +515,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		return CONST_capped_score(
 			uncapped_max_matching_score(s1len, s2len),
@@ -525,8 +531,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(s1len <= s2len);
 		#endif
 		if (s1len == s2len)
@@ -541,8 +547,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		if (s1len == s2len)
 			return score_identical(s1len, blocksize);
@@ -557,8 +563,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		assert(s1len <= s2len);
 		#endif
 		if (s1len == s2len)
@@ -574,8 +580,8 @@ public:
 	) noexcept
 	{
 		#ifdef FFUZZYPP_DEBUG
-		assert(s1len >= min_match_len && s1len <= digest_params::max_blockhash_len);
-		assert(s2len >= min_match_len && s2len <= digest_params::max_blockhash_len);
+		assert(s1len >= blockhash_comparison_params::min_match_len && s1len <= digest_params::max_blockhash_len);
+		assert(s2len >= blockhash_comparison_params::min_match_len && s2len <= digest_params::max_blockhash_len);
 		#endif
 		if (s1len == s2len)
 			return score_identical_2_9(s1len, blocksize);
@@ -680,7 +686,7 @@ public:
 					block hash is empty or 1-character.
 					This makes second block hash comparison score zero.
 				*/
-				static_assert(blockhash_comparison::min_match_len > 1,
+				static_assert(blockhash_comparison_params::min_match_len > 1,
 					"if the block size is not safe to double, the second block hash should not match "
 					"(due to implementation restrictions).");
 				#if defined(FFUZZYPP_DEBUG) && 0
@@ -742,7 +748,7 @@ public:
 				block hash is empty or 1-character.
 				This makes second block hash comparison score zero.
 			*/
-			static_assert(blockhash_comparison::min_match_len > 1,
+			static_assert(blockhash_comparison_params::min_match_len > 1,
 				"if the block size is not safe to double, the second block hash should not match "
 				"(due to implementation restrictions).");
 			#if defined(FFUZZYPP_DEBUG) && 0

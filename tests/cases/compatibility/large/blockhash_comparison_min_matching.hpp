@@ -39,16 +39,16 @@ class BlockhashComparisonMinMatchingTestsWithBlocksizeIndex
 
 TEST_P(BlockhashComparisonMinMatchingTestsWithBlocksizeIndex, MinMatchingScore)
 {
-	for (blockhash_len_t s1len = blockhash_comparison::min_match_len;
+	for (blockhash_len_t s1len = blockhash_comparison_params::min_match_len;
 		s1len <= digest_params::max_blockhash_len; s1len++)
 	{
-		for (blockhash_len_t s1idx = 0; s1idx <= s1len - blockhash_comparison::min_match_len; s1idx++)
+		for (blockhash_len_t s1idx = 0; s1idx <= s1len - blockhash_comparison_params::min_match_len; s1idx++)
 		{
 			string s1 = MinMatchingTemplate1(s1len, s1idx);
-			for (blockhash_len_t s2len = blockhash_comparison::min_match_len;
+			for (blockhash_len_t s2len = blockhash_comparison_params::min_match_len;
 				s2len <= digest_params::max_blockhash_len; s2len++)
 			{
-				for (blockhash_len_t s2idx = 0; s2idx <= s2len - blockhash_comparison::min_match_len; s2idx++)
+				for (blockhash_len_t s2idx = 0; s2idx <= s2len - blockhash_comparison_params::min_match_len; s2idx++)
 				{
 					string s2 = MinMatchingTemplate2(s2len, s2idx);
 					unsigned bi = GetParam();
