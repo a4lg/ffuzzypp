@@ -69,7 +69,7 @@ fuzzy.c (in ssdeep 2.11) is licensed under the terms of the
 GNU General Public License as published by the Free Software Foundation;
 either version 2 of the License, or (at your option) any later version.
 
-The Levenshtein distance code is contributed from kikairoya on Github.
+The indel distance code is contributed from kikairoya on Github.
 
 	Copyright (C) 2014 kikairoya <kikairoya@gmail.com>
 

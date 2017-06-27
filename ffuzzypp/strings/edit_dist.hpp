@@ -3,7 +3,7 @@
 	ffuzzy++ : C++ implementation of fast fuzzy hashing
 
 	strings/edit_dist.hpp
-	Levenshtein distance implementation without replacement
+	Indel distance implementation
 
 
 	Copyright (C) 2014 kikairoya <kikairoya@gmail.com>
@@ -32,18 +32,18 @@ namespace strings {
 namespace internal
 {
 	template <typename Tcost>
-	class edit_dist_common
+	class edit_dist_dp_impl
 	{
 	private:
-		edit_dist_common(void) = delete;
-		edit_dist_common(const edit_dist_common&) = delete;
+		edit_dist_dp_impl(void) = delete;
+		edit_dist_dp_impl(const edit_dist_dp_impl&) = delete;
 	public:
 		typedef Tcost cost_type;
 		static_assert(
 			safe_int::contracts::is_unsigned_integral_type<cost_type>(),
 			"cost_type must be an unsigned integral type.");
 	private:
-		static void cost_inner(
+		static void update_cost_inner(
 			const char* s1,
 			const char* s2, size_t s2len,
 			size_t i,
@@ -70,7 +70,7 @@ namespace internal
 			for (size_t j = 0; j <= s2len; j++)
 				row1[j] = static_cast<cost_type>(j);
 			for (size_t i = 0; i < s1len; i++)
-				cost_inner(s1, s2, s2len, i, row1, row2);
+				update_cost_inner(s1, s2, s2len, i, row1, row2);
 			return row1[s2len];
 		}
 		static cost_type cost_nonempty(
@@ -91,18 +91,18 @@ namespace internal
 				row1[j+1] = std::min(cost_d, cost_r);
 			}
 			for (size_t i = 1; i < s1len; i++)
-				cost_inner(s1, s2, s2len, i, row1, row2);
+				update_cost_inner(s1, s2, s2len, i, row1, row2);
 			return row1[s2len];
 		}
 	};
 }
 
 template <typename Tcost, size_t MaxSize>
-class edit_dist_fast
+class edit_dist_dp
 {
 private:
-	edit_dist_fast(void) = delete;
-	edit_dist_fast(const edit_dist_fast&) = delete;
+	edit_dist_dp(void) = delete;
+	edit_dist_dp(const edit_dist_dp&) = delete;
 public:
 	static constexpr const size_t max_size = MaxSize;
 	static_assert(max_size > 0, "max_size must not be zero.");
@@ -128,7 +128,63 @@ public:
 		assert(s2len <= max_size);
 		#endif
 		cost_type rows[2][max_size + 1];
-		return internal::edit_dist_common<Tcost>::cost(s1, s1len, s2, s2len, rows[0], rows[1]);
+		return internal::edit_dist_dp_impl<cost_type>::cost(s1, s1len, s2, s2len, rows[0], rows[1]);
+	}
+};
+
+template <typename Tcost, size_t MaxSize>
+class edit_dist_nonempty_dp
+{
+private:
+	edit_dist_nonempty_dp(void) = delete;
+	edit_dist_nonempty_dp(const edit_dist_nonempty_dp&) = delete;
+public:
+	static constexpr const size_t max_size = MaxSize;
+	static_assert(max_size > 0, "max_size must not be zero.");
+	static_assert(safe_int::safe_add<
+			safe_int::uvalue<size_t, max_size>,
+			safe_int::uvalue<size_t, 1>
+		>::is_valid,
+		"max_size + 1 must be in range of size_t.");
+	typedef Tcost cost_type;
+	static_assert(safe_int::safe_mul<
+			safe_int::uvalue<cost_type, max_size>,
+			safe_int::uvalue<cost_type, 2>
+		>::is_valid,
+		"max_size * 2 must be in range of cost_type.");
+public:
+	static cost_type cost(
+		const char* s1, size_t s1len,
+		const char* s2, size_t s2len
+	) noexcept
+	{
+		#ifdef FFUZZYPP_DEBUG
+		assert(s1len <= max_size);
+		assert(s2len <= max_size);
+		#endif
+		cost_type rows[2][max_size + 1];
+		return internal::edit_dist_dp_impl<cost_type>::cost_nonempty(s1, s1len, s2, s2len, rows[0], rows[1]);
+	}
+};
+
+
+
+template <typename Tcost, size_t MaxSize>
+class edit_dist_fast
+{
+private:
+	edit_dist_fast(void) = delete;
+	edit_dist_fast(const edit_dist_fast&) = delete;
+public:
+	static constexpr const size_t max_size = MaxSize;
+	typedef Tcost cost_type;
+public:
+	static cost_type cost(
+		const char* s1, size_t s1len,
+		const char* s2, size_t s2len
+	) noexcept
+	{
+		return edit_dist_dp<cost_type, max_size>::cost(s1, s1len, s2, s2len);
 	}
 };
 
@@ -140,30 +196,14 @@ private:
 	edit_dist_nonempty_fast(const edit_dist_nonempty_fast&) = delete;
 public:
 	static constexpr const size_t max_size = MaxSize;
-	static_assert(max_size > 0, "max_size must not be zero.");
-	static_assert(safe_int::safe_add<
-			safe_int::uvalue<size_t, max_size>,
-			safe_int::uvalue<size_t, 1>
-		>::is_valid,
-		"max_size + 1 must be in range of size_t.");
 	typedef Tcost cost_type;
-	static_assert(safe_int::safe_mul<
-			safe_int::uvalue<cost_type, max_size>,
-			safe_int::uvalue<cost_type, 2>
-		>::is_valid,
-		"max_size * 2 must be in range of cost_type.");
 public:
 	static cost_type cost(
 		const char* s1, size_t s1len,
 		const char* s2, size_t s2len
 	) noexcept
 	{
-		#ifdef FFUZZYPP_DEBUG
-		assert(s1len <= max_size);
-		assert(s2len <= max_size);
-		#endif
-		cost_type rows[2][max_size + 1];
-		return internal::edit_dist_common<Tcost>::cost_nonempty(s1, s1len, s2, s2len, rows[0], rows[1]);
+		return edit_dist_nonempty_dp<cost_type, max_size>::cost(s1, s1len, s2, s2len);
 	}
 };
 
