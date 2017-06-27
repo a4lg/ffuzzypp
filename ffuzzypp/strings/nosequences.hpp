@@ -43,12 +43,15 @@ public:
 	{
 		return false;
 	}
-	static size_t copy_elim_sequences(char* out, const char* in, size_t size) noexcept
+	static void copy_raw(char* out, const char* in, size_t size) noexcept
 	{
-		size_t ret = size;
 		while (size--)
 			*out++ = Ttransform::transform(*in++);
-		return ret;
+	}
+	static size_t copy_elim_sequences(char* out, const char* in, size_t size) noexcept
+	{
+		copy_raw(out, in, size);
+		return size;
 	}
 	template <char... terms>
 	class string_copy

@@ -87,4 +87,12 @@ TEST_F(NoSequenceTests, StringCopyCopyElimSequencesSpec)
 	}
 }
 
+TEST_F(NoSequenceTests, CopyRawSpec)
+{
+	char buf1[6] = "XYZDE";
+	char buf2[4] = "ABC";
+	test_type::copy_raw(buf1, buf2, 3);
+	EXPECT_STREQ("ABCDE", buf1);
+}
+
 #endif
