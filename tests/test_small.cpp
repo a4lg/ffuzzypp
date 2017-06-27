@@ -45,6 +45,7 @@ using namespace std;
 #include "cases/small/common_substr.hpp"
 #include "cases/small/edit_dist.hpp"
 #include "cases/small/nosequences.hpp"
+#include "cases/small/position_array.hpp"
 #include "cases/small/rolling_hash.hpp"
 #include "cases/small/sequences.hpp"
 #include "cases/small/terminators.hpp"

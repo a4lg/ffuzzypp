@@ -40,6 +40,7 @@ EXTRA_DIST = \
 	.gitignore \
 	cases/precond/digest.hpp \
 	cases/precond/digest_filesize.hpp \
+	cases/precond/position_array.hpp \
 	cases/precond/utils/minmax.hpp \
 	cases/precond/utils/static_assert_query.hpp \
 	cases/precond/utils/type_modifier.hpp \
@@ -64,6 +65,7 @@ EXTRA_DIST = \
 	cases/small/digest_generator.hpp \
 	cases/small/edit_dist.hpp \
 	cases/small/nosequences.hpp \
+	cases/small/position_array.hpp \
 	cases/small/rolling_hash.hpp \
 	cases/small/sequences.hpp \
 	cases/small/terminators.hpp \

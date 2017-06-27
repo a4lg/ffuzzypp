@@ -33,6 +33,7 @@ using namespace std;
 
 #include "cases/precond/digest.hpp"
 #include "cases/precond/digest_filesize.hpp"
+#include "cases/precond/position_array.hpp"
 #include "cases/precond/utils/minmax.hpp"
 #include "cases/precond/utils/static_assert_query.hpp"
 #include "cases/precond/utils/type_modifier.hpp"

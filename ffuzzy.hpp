@@ -42,6 +42,7 @@
 #include "ffuzzypp/context_hash_fast.hpp"
 #include "ffuzzypp/rolling_hash.hpp"
 #include "ffuzzypp/rolling_hash_ssdeep.hpp"
+#include "ffuzzypp/strings/position_array.hpp"
 #include "ffuzzypp/strings/common_substr.hpp"
 #include "ffuzzypp/strings/edit_dist.hpp"
 #include "ffuzzypp/strings/terminators.hpp"

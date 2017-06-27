@@ -41,6 +41,7 @@ nobase_include_HEADERS = \
 	ffuzzypp/strings/common_substr.hpp \
 	ffuzzypp/strings/edit_dist.hpp \
 	ffuzzypp/strings/nosequences.hpp \
+	ffuzzypp/strings/position_array.hpp \
 	ffuzzypp/strings/sequences.hpp \
 	ffuzzypp/strings/terminators.hpp \
 	ffuzzypp/strings/transform.hpp \

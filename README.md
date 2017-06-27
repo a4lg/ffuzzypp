@@ -63,6 +63,8 @@ Configuration Options
 *	--disable-debug  
 	Disable assertions on examples and tests.
 	Don't disable assertions if you wish to test ffuzzy++.
+*	--disable-position-array  
+	Disable using bit-parallel algorithms on examples and tests.
 *	--enable-examples  
 	Enable building examples (see "Building Examples" section)
 *	--enable-tests  
@@ -115,6 +117,8 @@ behavior of this library.
 
 *	`FFUZZYPP_DEBUG`  
 	This macro enables assertions for debugging.
+*	`FFUZZYPP_DISABLE_POSITION_ARRAY`  
+	This macro disables using bit-parallel algorithms.
 
 
 

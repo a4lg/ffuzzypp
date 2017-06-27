@@ -5,7 +5,7 @@
 #	configure.ac
 #	Configuration script
 #
-#	Copyright (C) 2015 Tsukasa OI.
+#	Copyright (C) 2017 Tsukasa OI.
 #
 #
 #	This program is free software; you can redistribute it and/or modify it
@@ -47,6 +47,15 @@ AC_ARG_ENABLE([debug],
 if test "x$enable_debug" != xno
 then
 AC_DEFINE([FFUZZYPP_DEBUG], [1], [enable testing this implementation])
+fi
+
+dnl --disable-position-array
+AC_ARG_ENABLE([position-array],
+[AS_HELP_STRING([--disable-position-array],[disable using bit-parallel algorithms on examples and tests])],,
+[enable_position_array=yes])
+if test "x$enable_position_array" = xno
+then
+AC_DEFINE([FFUZZYPP_DISABLE_POSITION_ARRAY], [1], [disable bit-parallel algorithms])
 fi
 
 dnl --enable-examples
