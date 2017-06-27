@@ -63,7 +63,7 @@ namespace contracts
 			std::numeric_limits<T>::digits >= 0;
 	}
 
-	// same implementation but copying for better diagnostics
+	// Same implementation but copying for better diagnostics
 	template <typename T>
 	struct integral_type
 	{
@@ -208,7 +208,7 @@ namespace operations
 		: contracts::binary_integral_type<TB>
 	{
 	private:
-		// refer C++11 specification [3.9.1 paragraph 3] for reason that
+		// Refer C++11 specification [3.9.1 p3] for reason that
 		// conversion to "unsigned" for non-negative "int" numbers is safe.
 		static constexpr const bool is_valid = BB && BS
 			&& VS < static_cast<unsigned>(std::numeric_limits<TB>::digits)

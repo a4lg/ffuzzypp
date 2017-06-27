@@ -75,7 +75,7 @@ public:
 		return static_cast<char>(h & 0x3f);
 	}
 public:
-	context_hash(void) noexcept = default; // initialize in undefined state
+	context_hash(void) noexcept = default; // initialize to undefined state
 };
 
 }

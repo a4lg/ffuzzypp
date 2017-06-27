@@ -320,7 +320,11 @@ typedef digest< true, false>  digest_unorm_t;
 typedef digest<false, true>   digest_long_t;
 typedef digest<false, false>  digest_long_unorm_t;
 
-// Type modifiers
+
+
+/*
+	Type modifiers
+*/
 namespace internal
 {
 	template <typename T>

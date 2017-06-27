@@ -467,7 +467,7 @@ public:
 		return h;
 	}
 public:
-	context_hash_fast(void) noexcept = default; // initialize in undefined state
+	context_hash_fast(void) noexcept = default; // initialize to undefined state
 };
 
 

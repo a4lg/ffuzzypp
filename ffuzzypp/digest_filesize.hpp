@@ -83,14 +83,18 @@ public:
 public:
 	static constexpr bool is_portable(digest_filesize_t total_size) noexcept
 	{
-		// WARNING: Given size may not be "portable" on insane architectures.
-		// Portability:
-		// - ffuzzy++ (3.0)
-		// - ssdeep (including 2.6-2.12)
-		// Note:
-		// Mr.Kornblum (the original author of ssdeep) considers
-		// version 2.9 the "standard". Note that this release does not
-		// support files equal to or larger than 4GiB.
+		/*
+			WARNING: Given size may not be "portable" on insane architectures.
+
+			Portability:
+			* ffuzzy++ (3.0)
+			* ssdeep (including 2.6-2.12)
+
+			Note:
+			Mr.Kornblum (the original author of ssdeep) considers
+			version 2.9 the "standard". Note that this release does not
+			support files equal to or larger than 4GiB.
+		*/
 		return total_size >= min_supported_size && total_size <= max_portable_size;
 	}
 	static constexpr bool is_supported_by_ssdeep_2_12(digest_filesize_t total_size) noexcept
