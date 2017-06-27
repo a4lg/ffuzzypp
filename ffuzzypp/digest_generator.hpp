@@ -29,7 +29,7 @@
 
 	CREDIT OF MODIFIED PORTIONS
 
-	Copyright (C) 2015 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
+	Copyright (C) 2017 Tsukasa OI <floss_ssdeep@irq.a4lg.com>
 
 */
 #ifndef FFUZZYPP_DIGEST_GENERATOR_HPP
@@ -51,6 +51,7 @@
 #include "digest_data.hpp"
 #include "digest_filesize.hpp"
 #include "digest.hpp"
+#include "utils/likely.hpp"
 #include "utils/safe_int.hpp"
 #include "strings/transform.hpp"
 #include "strings/sequences.hpp"
@@ -120,19 +121,21 @@ private:
 	blockhash_context bh[digest_blocksize::number_of_blockhashes];
 	digest_filesize_t totalsz;
 	digest_filesize_t totalsz_constant;
+	digest_filesize_t reduce_border;
 	rolling_hash roll;
 	unsigned bhstart;
 	unsigned bhend;
 	unsigned bhendlimit;
+	uint_least32_t rollmask;
 	context_hash_t hlast;
-	bool is_szclamped;
-	bool is_szconstant;
-	bool is_lasthash;
+	unsigned flags;
+	static constexpr const unsigned FLAG_LASTHASH   = 0x1;
+	static constexpr const unsigned FLAG_SZCONSTANT = 0x2;
 
 	// Simple data structure manipulation
 public:
-	bool is_total_size_clamped(void) const noexcept { return is_szclamped; }
-	bool is_file_size_constant(void) const noexcept { return is_szconstant; }
+	bool is_total_size_clamped(void) const noexcept { return totalsz > digest_filesize::max_size; }
+	bool is_file_size_constant(void) const noexcept { return flags & FLAG_SZCONSTANT; }
 	unsigned blockhash_index_start(void) const noexcept { return bhstart; }
 	unsigned blockhash_index_end(void)   const noexcept { return bhend; }
 	unsigned blockhash_index_end_limit(void) const noexcept { return bhendlimit; }
@@ -141,7 +144,7 @@ public:
 	digest_filesize_t get_file_size_constant(void) const noexcept { return totalsz_constant; }
 	bool set_file_size_constant(digest_filesize_t size) noexcept
 	{
-		if (is_szconstant && totalsz_constant != size)
+		if (is_file_size_constant() && totalsz_constant != size)
 			return false;
 		if (size > digest_filesize::max_size)
 			return false;
@@ -150,7 +153,7 @@ public:
 			digest_blocksize::number_of_blockhashes - 1,
 			blockhash_index_guessed_by_filesize(size) + 1
 		);
-		is_szconstant = true;
+		flags |= FLAG_SZCONSTANT;
 		return true;
 	}
 
@@ -163,122 +166,107 @@ public:
 		bh[0].digest[digest_params::max_blockhash_len - 1] = digest_nil;
 		bh[0].digesth = digest_nil;
 		bh[0].dindex = 0;
-		totalsz   = 0;
+		totalsz = 0;
+		reduce_border = guessed_filesize_at(0);
 		roll.reset();
 		bhstart = 0;
 		bhend   = 1;
 		bhendlimit = digest_blocksize::number_of_blockhashes - 1;
-		is_szclamped  = false;
-		is_szconstant = false;
-		is_lasthash  = false;
+		rollmask = 0;
+		flags = 0;
 	}
 
-private:
-	// Update hashing state by single character
-	void update_internal(unsigned char c) noexcept
-	{
-		roll.update(c);
-		// digest_blocksize_t is an unsigned integral type with at least 32-bit
-		digest_blocksize_t h(roll.sum());
-		for (unsigned i = bhstart; i < bhend; i++)
-		{
-			bh[i].hfull.update(c);
-			bh[i].hhalf.update(c);
-		}
-		if (is_lasthash)
-			hlast.update(c);
-		digest_blocksize_t bs = digest_blocksize::at(bhstart);
-		for (unsigned i = bhstart; i < bhend; i++, bs *= 2)
-		{
-			if ((h % bs) != bs - 1)
-				break;
-			if (bh[i].dindex == 0)
-			{
-				// fork to prepare larger block sizes
-				#ifdef FFUZZYPP_DEBUG
-				assert(i == bhend - 1);
-				#endif
-				if (bhend > bhendlimit)
-				{
-					if (bhendlimit == digest_blocksize::number_of_blockhashes - 1
-						&& !is_lasthash)
-					{
-						hlast = bh[i].hfull;
-						is_lasthash = true;
-					}
-				}
-				else
-				{
-					bh[i+1].hfull = bh[i].hfull;
-					bh[i+1].hhalf = bh[i].hhalf;
-					bh[i+1].digest[digest_params::max_blockhash_len - 1] = digest_nil;
-					bh[i+1].digesth = digest_nil;
-					bh[i+1].dindex = 0;
-					bhend++;
-				}
-			}
-			bh[i].digest[bh[i].dindex] = bh[i].hfull.sum_in_base64();
-			bh[i].digesth = bh[i].hhalf.sum_in_base64();
-			if (bh[i].dindex < digest_params::max_blockhash_len - 1)
-			{
-				bh[i].dindex++;
-				bh[i].hfull.reset();
-				if (bh[i].dindex < digest_params::max_blockhash_len / 2)
-				{
-					bh[i].digesth = digest_nil;
-					bh[i].hhalf.reset();
-				}
-			}
-			// eliminate block sizes which will not be chosen
-			else if (i == bhstart && bhend - bhstart >= 2
-				&& guessed_filesize(bs) < (is_szconstant ? totalsz_constant : totalsz)
-				&& bh[i+1].dindex >= digest_params::max_blockhash_len / 2)
-			{
-				// unlike fork to prepare larger block sizes,
-				// we check i is bhstart first (because this test takes some time)
-				#if 0
-				assert(i == bhstart);
-				#endif
-				bhstart++;
-			}
-		}
-	}
-
-	// Total size manipulation
-private:
-	void step_size_1(void) noexcept
-	{
-		if (is_szclamped)
-			return;
-		if (totalsz++ == digest_filesize::max_size)
-			is_szclamped = true;
-	}
-	void step_size_n(size_t len) noexcept
-	{
-		if (is_szclamped)
-			return;
-		if (len > digest_filesize::max_size
-			|| digest_filesize::max_size - digest_filesize_t(len) < totalsz)
-		{
-			totalsz = digest_filesize::max_size + 1;
-			is_szclamped = true;
-		}
-		else
-			totalsz += digest_filesize_t(len);
-	}
-
-	// Update utilities (by character or by buffer)
+	// Update functions (by buffer or by character)
 public:
-	void update(unsigned char c) noexcept
-	{
-		step_size_1();
-		update_internal(c);
-	}
 	void update(const unsigned char* buf, size_t len) noexcept
 	{
-		step_size_n(len);
+		rolling_hash r = roll;
+		if (FFUZZYPP_UNLIKELY(len > digest_filesize::max_size
+			|| digest_filesize::max_size - digest_filesize_t(len) < totalsz))
+		{
+			totalsz = digest_filesize::max_size + 1;
+		}
+		else
+		{
+			totalsz += digest_filesize_t(len);
+		}
 		while (len--)
-			update_internal(*buf++);
+		{
+			unsigned char c = *buf++;
+			r.update(c);
+			for (unsigned i = bhstart; i < bhend; i++)
+			{
+				bh[i].hfull.update(c);
+				bh[i].hhalf.update(c);
+			}
+			if (flags & FLAG_LASTHASH)
+				hlast.update(c);
+			uint_least32_t horg = (r.sum() + 1) & uint_least32_t(0xfffffffful);
+			uint_least32_t h = horg / uint_least32_t(digest_blocksize::min_blocksize);
+			if (0xfffffffful % digest_blocksize::min_blocksize != digest_blocksize::min_blocksize - 1 && !horg)
+				continue;
+			if (FFUZZYPP_LIKELY(h & rollmask))
+				continue;
+			if (horg % uint_least32_t(digest_blocksize::min_blocksize))
+				continue;
+			h >>= bhstart;
+			unsigned i = bhstart;
+			do
+			{
+				if (FFUZZYPP_UNLIKELY(bh[i].dindex == 0))
+				{
+					// fork to prepare larger block sizes
+					if (bhend > bhendlimit)
+					{
+						if (bhendlimit == digest_blocksize::number_of_blockhashes - 1
+							&& !(flags & FLAG_LASTHASH))
+						{
+							hlast = bh[i].hfull;
+							flags |= FLAG_LASTHASH;
+						}
+					}
+					else
+					{
+						bh[i+1].hfull = bh[i].hfull;
+						bh[i+1].hhalf = bh[i].hhalf;
+						bh[i+1].digest[digest_params::max_blockhash_len - 1] = digest_nil;
+						bh[i+1].digesth = digest_nil;
+						bh[i+1].dindex = 0;
+						bhend++;
+					}
+				}
+				bh[i].digest[bh[i].dindex] = bh[i].hfull.sum_in_base64();
+				bh[i].digesth = bh[i].hhalf.sum_in_base64();
+				if (bh[i].dindex < digest_params::max_blockhash_len - 1)
+				{
+					bh[i].dindex++;
+					bh[i].hfull.reset();
+					if (bh[i].dindex < digest_params::max_blockhash_len / 2)
+					{
+						bh[i].digesth = digest_nil;
+						bh[i].hhalf.reset();
+					}
+				}
+				// eliminate block sizes which will not be chosen
+				else if (FFUZZYPP_UNLIKELY(bhend - bhstart >= 2
+					&& reduce_border < (is_file_size_constant() ? totalsz_constant : totalsz)
+					&& bh[i+1].dindex >= digest_params::max_blockhash_len / 2))
+				{
+					bhstart++;
+					rollmask = rollmask * 2 + 1;
+					reduce_border *= 2;
+				}
+				if (h & 1)
+					break;
+				h >>= 1;
+			} while (++i < bhend);
+		}
+		roll = r;
+	}
+	void update(unsigned char c) noexcept
+	{
+		unsigned char C(c);
+		update(&C, 1);
 	}
 
 	// High-level update utilities
@@ -360,9 +348,9 @@ private:
 		*/
 		static_assert(Shortened == true || IsShort == false,
 			"copying long result to short digest_data structure is prohibited.");
-		if (is_szclamped)
+		if (is_total_size_clamped())
 			return false;
-		if (is_szconstant && totalsz != totalsz_constant)
+		if (is_file_size_constant() && totalsz != totalsz_constant)
 			return false;
 		unsigned bi = blockhash_index_guessed_to_start();
 		digest.blksize = digest_blocksize::at(bi);
