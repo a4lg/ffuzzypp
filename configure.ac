@@ -29,7 +29,7 @@
 #
 #
 AC_PREREQ([2.65])
-AC_INIT([ffuzzypp], [3.1], [floss_ssdeep@irq.a4lg.com])
+AC_INIT([ffuzzypp], [3.1.1], [floss_ssdeep@irq.a4lg.com])
 AC_CONFIG_SRCDIR([ffuzzy_declarations.cpp])
 AC_CONFIG_AUX_DIR([ext])
 AM_INIT_AUTOMAKE([foreign dist-xz])
