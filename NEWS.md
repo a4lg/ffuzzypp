@@ -2,6 +2,12 @@ ffuzzy++ : C++ implementation of fast fuzzy hashing
 ====================================================
 
 
+Version 4.0.1 - 2017-06-28
+---------------------------
+
+*	`make dist` issue is now fixed.
+
+
 Version 4.0 - 2017-06-28
 -------------------------
 
