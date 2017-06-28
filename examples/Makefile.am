@@ -28,4 +28,4 @@ noinst_PROGRAMS = compute-hash compare-hash
 compute_hash_SOURCES = compute-hash.cpp
 compare_hash_SOURCES = compare-hash.cpp
 endif
-EXTRA_DIST = README.md .gitignore
+EXTRA_DIST = .gitignore
